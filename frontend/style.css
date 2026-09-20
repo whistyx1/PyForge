@@ -1,0 +1,158 @@
+:root{
+    --background-color: #F5F3EC;
+    --text-black: #0A1830;
+    --text-blue: #2868F0;
+    --text-gray: #5F6B7C;
+    --highlights-dark: #10213B;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    font-family: "Inter", sans-serif;
+}
+
+ul{
+    list-style: none;
+}
+
+a{
+    text-decoration: none;
+}
+
+.header{
+    width: 100%;
+    position: sticky;
+    z-index: 999;
+    top:0;
+    background-color: var(--background-color);
+    padding: 21px 80px;
+    border-bottom:1px solid #C9D0DA;
+}
+
+[class*='_container']{
+    max-width: 1280px;
+    margin-inline: auto;
+}
+
+.header_nav_bar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.main_logo{
+    width: 122px;
+    height: 34px;
+    display: block;
+}
+
+.header_list{
+    display: flex;
+    gap: 28px;
+}
+
+.header_list-link{
+    color: var(--highlights-dark);
+    font-size: 14px;
+}
+
+.button{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    padding: 16.5px 22px;
+    border-radius: 8px;
+    font-weight: 700;
+    color: var(--text-black);
+    border: 1px solid transparent;
+}
+
+.button--primary{
+    background-color: #FFD84D;
+}
+
+.button--secondary{
+    background-color: white;
+    border-color:  #C9D0DA;
+}
+
+.header_list-button-arrow{
+    width: 11px;
+    height: auto;
+    display: block;
+}
+
+.hero_container{
+    padding: 84px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 72px;
+}
+
+.hero_content{
+    flex: 1;
+    max-width: 648px;
+}
+
+.hero_terminal{
+    width: 560px;
+}
+
+.hero_topic{
+    color: var(--text-blue);
+    font-family: "Roboto Mono", sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.hero_text{
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.hero_title{
+    font-weight: 300;
+    font-size: 60px;
+}
+
+.hero_desc{
+    font-weight: 200;
+    font-size: 19px;
+    color: var(--text-gray);
+}
+
+.hero_buttons{
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.hero_highlights{
+    border-top: 1px solid #C9D0DA;
+    padding: 24px 80px;
+}
+
+.hero_highlights-list{
+    max-width: 1280px;
+    margin-inline: auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.hero_highlights-list-item{
+    display: flex;
+    align-items: center;
+    gap: 10px
+}
