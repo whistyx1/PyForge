@@ -189,6 +189,7 @@ a{
     font-family: "Inter", sans-serif;
     font-weight: 300;
     margin-top: 16px;
+    line-height: 110%;
 }
 
 .steps_list{
@@ -228,4 +229,169 @@ a{
     font-size: 16px;
     color: var(--text-gray);
     line-height: 1.55;
+}
+
+.capabilities{
+    background-color: white;
+    padding: 96px 0;
+}
+
+.capabilities_topic{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    font-family: 'Roboto Mono', monospace;
+    color: var(--text-blue);
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 16px;
+}
+
+.capabilities_title{
+    font-weight: 400;
+    font-size: 42px;
+    line-height: 110%;
+    margin-bottom: 16px;
+}
+
+.capabilities_desc{
+    color: var(--text-gray);
+    font-size: 19px;
+    line-height: 155%;
+    font-weight: 400;
+    margin-bottom: 48px;
+}
+
+.capabilities_list{
+    display: grid;
+    grid-template-columns:repeat(3, 1fr);
+    grid-template-rows: 1fr;
+    gap: 20px;
+}
+
+.capability_card{
+    background-color: var(--background-color);
+    border: 1px solid #C9D0DA;
+    border-radius: 14px;
+    padding: 26px;
+}
+
+.capability_image{
+    width: 42px;
+    height: 42px;
+    display: block;
+    background-color: #E8EFFE;
+    padding: 10.5px;
+    border-radius: 10px;
+    margin-bottom: 18px;
+}
+
+.capability_title{
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 18px;
+}
+
+.capability_description{
+    color: var(--text-gray);
+    font-size: 15px;
+    line-height: 155%;
+    font-weight: 400;
+}
+
+.architecture{
+    padding: 96px 0;
+    background-color: var(--text-black);
+}
+
+.architecture_header{
+    margin-bottom: 44px;
+}
+
+.architecture_topic{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    font-family: 'Roboto Mono', monospace;
+    font-size: 12px;
+    font-weight: bold;
+    color: #A9C4FF;
+    margin-bottom: 16px;
+}
+
+.architecture_title{
+    color: white;
+    font-size: 42px;
+    font-weight: 400;
+    line-height: 110%;
+    margin-bottom: 16px;
+}
+
+.architecture_desc{
+    color: #C8D2E2;
+    font-size: 19px;
+    font-weight: 400;
+    line-height: 1.55;
+}
+
+.architecture_cards-list{
+    display: flex;
+    gap: 10px;
+    margin-bottom: 44px;
+}
+
+.architecture_item{
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+    gap: 10px;
+}
+
+.architecture_card{
+    border: 1px solid #41516B;
+    border-radius: 14px;
+    padding: 18px;
+    flex: 1;
+    min-width: 0;
+    min-height: 116px;
+    background-color: #112442;
+    transition: background-color 0.15s;
+}
+
+.architecture_card:hover{
+    background-color: #2868F0;
+}
+
+.architecture_card-title{
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.architecture_card-arrow{
+    flex-shrink: 0;
+}
+
+.architecture_card-desc{
+    color: #A9C4FF;
+    font-family: 'Roboto mono', monospace;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.architecture_note{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.architecture_note-text{
+    color: #A9C4FF;
+    font-family: 'Roboto mono', monospace;
+    font-size: 12px;
+
 }
