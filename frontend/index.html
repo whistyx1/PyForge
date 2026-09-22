@@ -329,6 +329,74 @@
                 </ul>
             </div>
         </section>
+        <section class="faq">
+            <div class="faq_container">
+                <div class="faq_info">
+                    <div class="faq_info-topic">
+                        <img src="assets/sparkle.svg" alt="" class="faq_info-topic-image">
+                        <p class="faq_info-topic-text">PRACTICAL ANSWERS</p>
+                    </div>
+                    <h2 class="faq_title">
+                        Questions before your first deploy.
+                    </h2>
+                    <p class="faq_desc">
+                        The operating model is intentionally simple: local tooling, reviewable commands, SSH, and infrastructure you own.
+                    </p>
+                </div>
+                <div class="faq_questions">
+                    <ul class="faq_list">
+                        <li class="faq_list-item">
+                            <h3 class="faq_list-title">
+                                Where does PyForge run?
+                            </h3>
+                            <p class="faq_list-desc">
+                                PyForge runs locally. It analyzes and prepares the deployment on your machine, then connects to your server over SSH.
+                            </p>
+                        </li>
+                        <li class="faq_list-item">
+                            <h3 class="faq_list-title">
+                                What server do I need?
+                            </h3>
+                            <p class="faq_list-desc">
+                                A Linux server with Docker installed. PyForge checks the server before deployment.
+                            </p>
+                        </li>
+                        <li class="faq_list-item">
+                            <h3 class="faq_list-title">
+                                Can I review commands before they run?
+                            </h3>
+                            <p class="faq_list-desc">
+                                Yes. PyForge shows the deployment plan and commands for approval before it changes your server.
+                            </p>
+                        </li>
+                        <li class="faq_list-item">
+                            <h3 class="faq_list-title">
+                                Does PyForge generate Docker configuration?
+                            </h3>
+                            <p class="faq_list-desc">
+                                Yes. It generates a Dockerfile and Docker Compose configuration for the deployment.
+                            </p>
+                        </li>
+                        <li class="faq_list-item">
+                            <h3 class="faq_list-title">
+                                Is PostgreSQL required?
+                            </h3>
+                            <p class="faq_list-desc">
+                                No. PostgreSQL is optional and can be included when your project needs it.
+                            </p>
+                        </li>
+                        <li class="faq_list-item">
+                            <h3 class="faq_list-title">
+                                Which Python frameworks are supported?
+                            </h3>
+                            <p class="faq_list-desc">
+                                PyForge supports Django, FastAPI, and Flask projects.
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
     </main>
 </body>
 </html>
