@@ -459,3 +459,85 @@ a{
     font-size: 14px;
     font-weight: 600;
 }
+
+.supported{
+    padding: 96px 0;
+}
+
+.supported_topic{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: var(--text-blue);
+    font-family: 'Roboto mono', monospace;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 16px;
+}
+
+.supported_title{
+    font-weight: 400;
+    font-size: 42px;
+    line-height: 1.1;
+    margin-bottom: 16px;
+}
+
+.supported_desc{
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--text-gray);
+    margin-bottom: 46px;
+}
+
+.supported_list{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    align-items: stretch;
+}
+
+.project_card{
+    padding: 28px;
+    background-color:var(--background-color);
+    border: 1px solid #C9D0DA;
+    border-radius: 14px;
+    min-height: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100%;
+}
+
+.project_card-image{
+    width: 48px;
+    height: 48px;
+}
+.project_card-title{
+    font-size: 22px;
+    font-weight: 400;
+
+}
+
+.project_card-desc{
+    color: var(--text-gray);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.55;
+}
+
+.project_card-examples{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.project_card-tag{
+    background-color: #E8EFFE;
+    color: var(--text-blue);
+    font-weight: 600;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 999px;
+}
