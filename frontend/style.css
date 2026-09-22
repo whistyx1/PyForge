@@ -600,3 +600,131 @@ a{
     font-weight: 400;
     color: var(--text-gray);
 }
+
+.cta{
+    background-color: #0A1830;
+    padding: 88px;
+    border-bottom: 1px solid #8290A5;
+}
+
+.cta_container{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cta_info{
+    max-width: 700px;
+    height: auto;
+}
+
+.cta_topic{
+    color: #FFD84D;
+    font-weight: bold;
+    font-size: 12px;
+    margin-bottom: 18px;
+    font-family: 'Roboto mono', monospace;
+}
+
+.cta_title{
+    color: white;
+    font-size: 42px;
+    font-weight: 400;
+    margin-bottom: 18px;
+}
+
+.cta_desc{
+    color: #C8D2E2;
+    line-height: 1.55;
+    font-size: 19px;
+    font-weight: 400;
+}
+
+.cta_buttons{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.footer{
+    background-color: #0A1830;
+    padding: 48px 0;
+}
+
+.footer_top{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.footer_title_image{
+    width: 30px;
+    height: auto;
+}
+
+.footer_title{
+    display: flex;
+    align-items: center;
+    gap: 2px;
+
+    color: white;
+    font-size: 24px;
+    font-weight: 400;
+    margin-bottom: 12px;
+}
+
+.footer_desc{
+    color: #AAB7CA;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.footer_features{
+    display: flex;
+    align-items: flex-start;
+    gap: 69px;
+}
+
+.footer_product_title, .footer_resources_title{
+    color: #A9C4FF;
+    font-family: 'Roboto mono', monospace;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.footer_product_item, .footer_resources_item{
+    margin-top: 12px;
+    color: white;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.feature_link{
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.feature_link:hover{
+    color: #A9C4FF;
+}
+
+.footer_bottom{
+    color: #8290A5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 46px;
+}
+
+.footer_phrase{
+    font-family: 'Roboto mono', monospace;
+    font-size: 11px;
+    font-weight: 400;
+}
+
+.footer_name{
+    font-size: 12px;
+    font-weight: 400;
+}
