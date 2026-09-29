@@ -1,11 +1,12 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PyForge</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/png" href="./assets/favicon.png?v=3">
+    <title>{{project_name}}</title>
+    <link rel="stylesheet" href="{% static 'landing/style.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'landing/assets/favicon.png' %}?v=3">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
@@ -14,7 +15,7 @@
     <header class="header">
         <div class="header_container">
             <nav class="header_nav_bar">
-                <img src="assets/pyforge-logo.svg" alt="PyForge" class="main_logo">
+                <img src="{% static 'landing/assets/pyforge-logo.svg' %}" alt="PyForge" class="main_logo">
 
                 <ul class="header_list">
                     <li class="header_list-item">
@@ -35,7 +36,7 @@
                 </ul>
                 <a href="" class="button button--primary">
                     <span>Try PyForge locally</span>
-                    <img src="assets/arrow-right.svg" alt="" class="header_list-button-arrow">
+                    <img src="{% static 'landing/assets/arrow-right.svg' %}" alt="" class="header_list-button-arrow">
                 </a>
             </nav>
         </div>
@@ -58,38 +59,38 @@
                     <div class="hero_buttons">
                         <a href="" class="button button--primary">
                             <span>Try PyForge locally</span>
-                            <img src="assets/arrow-right.svg" alt="" class="header_list-button-arrow">
+                            <img src="{% static 'landing/assets/arrow-right.svg' %}" alt="" class="header_list-button-arrow">
                         </a>
                         <a href="" class="button button--secondary">
                             <span class="header_list-button-text">View on GitHub</span>
-                            <img src="assets/arrow-right.svg" alt="" class="header_list-button-arrow">
+                            <img src="{% static 'landing/assets/arrow-right.svg' %}" alt="" class="header_list-button-arrow">
                         </a>
                     </div>
                 </div>
-                <img src="assets/terminal-preview.png" alt="PyForge terminal" class="hero_terminal">
+                <img src="{% static 'landing/assets/terminal-preview.png' %}" alt="PyForge terminal" class="hero_terminal">
             </div>
             <div class="hero_highlights">
                 <ul class="hero_highlights-list">
                     <li class="hero_highlights-list-item">
-                        <img src="assets/check-circle.svg" alt="" class="hero-highlights-list-item-image">
+                        <img src="{% static 'landing/assets/check-circle.svg' %}" alt="" class="hero-highlights-list-item-image">
                         <p class="hero_highlights-list-item-text">
                             Local-first
                         </p>
                     </li>
                     <li class="hero_highlights-list-item">
-                        <img src="assets/check-circle.svg" alt="" class="hero-highlights-list-item-image">
+                        <img src="{% static 'landing/assets/check-circle.svg' %}" alt="" class="hero-highlights-list-item-image">
                         <p class="hero_highlights-list-item-text">
                             Review every command
                         </p>
                     </li>
                     <li class="hero_highlights-list-item">
-                        <img src="assets/check-circle.svg" alt="" class="hero-highlights-list-item-image">
+                        <img src="{% static 'landing/assets/check-circle.svg' %}" alt="" class="hero-highlights-list-item-image">
                         <p class="hero_highlights-list-item-text">
                             Deploy over SSH
                         </p>
                     </li>
                     <li class="hero_highlights-list-item">
-                        <img src="assets/check-circle.svg" alt="" class="hero-highlights-list-item-image">
+                        <img src="{% static 'landing/assets/check-circle.svg' %}" alt="" class="hero-highlights-list-item-image">
                         <p class="hero_highlights-list-item-text">
                             No hosted control plane
                         </p>
@@ -101,7 +102,7 @@
             <div class="steps_container">
                 <div class="steps_header">
                     <div class="steps_topic">
-                        <img src="assets/sparkle.svg" alt="" class="steps_topic-image">
+                        <img src="{% static 'landing/assets/sparkle.svg' %}" alt="" class="steps_topic-image">
                         <span class="steps_topic-text">THREE CLEAR STEPS</span>
                     </div>
                     <h2 class="steps_title">From source code to your server—without a black box.</h2>
@@ -129,7 +130,7 @@
             <div class="capabilities_container">
                 <div class="capabilities_header">
                     <div class="capabilities_topic">
-                        <img src="assets/sparkle.svg" alt="" class="capabilities_topic-image">
+                        <img src="{% static 'landing/assets/sparkle.svg' %}" alt="" class="capabilities_topic-image">
                         <span class="capabilities_topic-text">CAPABILITIES</span>
                     </div>
                     <h2 class="capabilities_title">Practical deployment machinery, kept in view.</h2>
@@ -137,32 +138,32 @@
                 </div>
                 <ul class="capabilities_list">
                     <li class="capability_card">
-                        <img src="assets/project-analysis.svg" alt="" class="capability_image">
+                        <img src="{% static 'landing/assets/project-analysis.svg' %}" alt="" class="capability_image">
                         <h3 class="capability_title">Project analysis</h3>
                         <p class="capability_description">Detects your Python project and confirms the framework, dependencies, start command, and health check.</p>
                     </li>
                     <li class="capability_card">
-                        <img src="assets/docker-generation.svg" alt="" class="capability_image">
+                        <img src="{% static 'landing/assets/docker-generation.svg' %}" alt="" class="capability_image">
                         <h3 class="capability_title">Docker generation</h3>
                         <p class="capability_description">Generates a Dockerfile and Docker Compose configuration for the reviewed deployment.</p>
                     </li>
                     <li class="capability_card">
-                        <img src="assets/ssh-server-checks.svg" alt="" class="capability_image">
+                        <img src="{% static 'landing/assets/ssh-server-checks.svg' %}" alt="" class="capability_image">
                         <h3 class="capability_title">SSH server checks</h3>
                         <p class="capability_description">Checks your Linux server over SSH and confirms Docker is installed before deployment.</p>
                     </li>
                     <li class="capability_card">
-                        <img src="assets/deployment-plan.svg" alt="" class="capability_image">
+                        <img src="{% static 'landing/assets/deployment-plan.svg' %}" alt="" class="capability_image">
                         <h3 class="capability_title">Reviewable deployment plans</h3>
                         <p class="capability_description">Shows each command for approval before making changes to your server.</p>
                     </li>
                     <li class="capability_card">
-                        <img src="assets/postgresql.svg" alt="" class="capability_image">
+                        <img src="{% static 'landing/assets/postgresql.svg' %}" alt="" class="capability_image">
                         <h3 class="capability_title">Optional PostgreSQL</h3>
                         <p class="capability_description">Adds PostgreSQL when your project needs it—without making a database mandatory.</p>
                     </li>
                     <li class="capability_card">
-                        <img src="assets/logs-health-checks.svg" alt="" class="capability_image">
+                        <img src="{% static 'landing/assets/logs-health-checks.svg' %}" alt="" class="capability_image">
                         <h3 class="capability_title">Logs and health checks</h3>
                         <p class="capability_description">Displays deployment logs and application health status after startup.</p>
                     </li>
@@ -173,7 +174,7 @@
             <div class="architecture_container">
                 <div class="architecture_header">
                     <div class="architecture_topic">
-                        <img src="assets/yellow_star.svg" alt="" class="architecture_topic-image">
+                        <img src="{% static 'landing/assets/yellow_star.svg' %}" alt="" class="architecture_topic-image">
                         <p class="architecture_topic-text">LOCAL-TO-SERVER ARCHITECTURE</p>
                     </div>
                     <h2 class="architecture_title">
@@ -194,7 +195,7 @@
                                     Folder / ZIP / Git
                                 </p>
                             </div>
-                            <img src="assets/arrow.svg" alt="" class="architecture_card-arrow">
+                            <img src="{% static 'landing/assets/arrow.svg' %}" alt="" class="architecture_card-arrow">
                         </li>
                         <li class="architecture_item">
                             <div class="architecture_card">
@@ -205,7 +206,7 @@
                                     Analysis + plan
                                 </p>
                             </div>
-                            <img src="assets/arrow.svg" alt="" class="architecture_card-arrow">
+                            <img src="{% static 'landing/assets/arrow.svg' %}" alt="" class="architecture_card-arrow">
                         </li>
                         <li class="architecture_item">
                             <div class="architecture_card">
@@ -216,7 +217,7 @@
                                     Secure connection
                                 </p>
                             </div>
-                            <img src="assets/arrow.svg" alt="" class="architecture_card-arrow">
+                            <img src="{% static 'landing/assets/arrow.svg' %}" alt="" class="architecture_card-arrow">
                         </li>
                         <li class="architecture_item">
                             <div class="architecture_card">
@@ -227,7 +228,7 @@
                                     Docker installed
                                 </p>
                             </div>
-                            <img src="assets/arrow.svg" alt="" class="architecture_card-arrow">
+                            <img src="{% static 'landing/assets/arrow.svg' %}" alt="" class="architecture_card-arrow">
                         </li>
                         <li class="architecture_item">
                             <div class="architecture_card">
@@ -241,7 +242,7 @@
                         </li>
                     </ol>
                     <div class="architecture_note">
-                        <img src="assets/lock-keyhole-open.svg" alt="" class="architecture_note-image">
+                        <img src="{% static 'landing/assets/lock-keyhole-open.svg' %}" alt="" class="architecture_note-image">
                         <p class="architecture_note-text">
                             LOCAL CONTROL → SSH BOUNDARY → SERVER YOU OWN
                         </p>
@@ -253,7 +254,7 @@
             <div class="review_container">
                 <div class="review_content">
                     <div class="review_topic">
-                        <img src="assets/sparkle.svg" alt="" class="review_topic-image">
+                        <img src="{% static 'landing/assets/sparkle.svg' %}" alt="" class="review_topic-image">
                         <p class="review_topic-text">
                             REVIEW BEFORE EXECUTION
                         </p>
@@ -266,27 +267,27 @@
                     </p>
                     <ul class="review_benefits-list">
                         <li class="review_benefit">
-                            <img src="assets/check-circle.svg" alt="" class="benefit-image">
+                            <img src="{% static 'landing/assets/check-circle.svg' %}" alt="" class="benefit-image">
                             <span class="benefit-text">Commands shown in sequence</span>
                         </li>
                         <li class="review_benefit">
-                            <img src="assets/check-circle.svg" alt="" class="benefit-image">
+                            <img src="{% static 'landing/assets/check-circle.svg' %}" alt="" class="benefit-image">
                             <span class="benefit-text">Server target stays explicit</span>
                         </li>
                         <li class="review_benefit">
-                            <img src="assets/check-circle.svg" alt="" class="benefit-image">
+                            <img src="{% static 'landing/assets/check-circle.svg' %}" alt="" class="benefit-image">
                             <span class="benefit-text">Approval required before execution</span>
                         </li>
                     </ul>
                 </div>
-                <img src="assets/Plan mockup.png" alt="Deployment plan with build, test, startup, and health check steps" class="review_plan">
+                <img src="{% static 'landing/assets/Plan mockup.png' %}" alt="Deployment plan with build, test, startup, and health check steps" class="review_plan">
             </div>
         </section>
         <section class="supported" id="supported-projects">
             <div class="supported_container">
                 <div class="supported_header">
                     <div class="supported_topic">
-                        <img src="assets/sparkle.svg" alt="" class="supported_topic-image">
+                        <img src="{% static 'landing/assets/sparkle.svg' %}" alt="" class="supported_topic-image">
                         <span class="supported_topic-text">SUPPORTED PROJECTS</span>
                     </div>
                     <h2 class="supported_title">Built for common Python web projects.</h2>
@@ -294,7 +295,7 @@
                 </div>
                 <ul class="supported_list">
                     <li class="project_card">
-                        <img src="assets/DJ.svg" alt="" class="project_card-image">
+                        <img src="{% static 'landing/assets/DJ.svg' %}" alt="" class="project_card-image">
                         <h3 class="project_card-title">Django</h3>
                         <p class="project_card-desc">
                             Detects the Django project, dependencies, start command, port, environment variables, and health check.
@@ -305,7 +306,7 @@
                         </div>
                     </li>
                     <li class="project_card">
-                        <img src="assets/FA.svg" alt="" class="project_card-image">
+                        <img src="{% static 'landing/assets/FA.svg' %}" alt="" class="project_card-image">
                         <h3 class="project_card-title">FastAPI</h3>
                         <p class="project_card-desc">
                             Confirms the application command and port, then includes them in the reviewable deployment plan.
@@ -316,7 +317,7 @@
                         </div>
                     </li>
                     <li class="project_card">
-                        <img src="assets/FL.svg" alt="" class="project_card-image">
+                        <img src="{% static 'landing/assets/FL.svg' %}" alt="" class="project_card-image">
                         <h3 class="project_card-title">Flask</h3>
                         <p class="project_card-desc">
                             Analyzes the project and lets you confirm its start command, port, and deployment settings.
@@ -333,7 +334,7 @@
             <div class="faq_container">
                 <div class="faq_info">
                     <div class="faq_info-topic">
-                        <img src="assets/sparkle.svg" alt="" class="faq_info-topic-image">
+                        <img src="{% static 'landing/assets/sparkle.svg' %}" alt="" class="faq_info-topic-image">
                         <p class="faq_info-topic-text">PRACTICAL ANSWERS</p>
                     </div>
                     <h2 class="faq_title">
@@ -411,11 +412,11 @@
                 <div class="cta_buttons">
                     <a href="" class="button button--primary">
                         <span>Try PyForge locally</span>
-                        <img src="assets/arrow-right.svg" alt="" class="header_list-button-arrow">
+                        <img src="{% static 'landing/assets/arrow-right.svg' %}" alt="" class="header_list-button-arrow">
                     </a>
                     <a href="" class="button button--secondary">
                         <span class="header_list-button-text">View on GitHub</span>
-                        <img src="assets/arrow-right.svg" alt="" class="header_list-button-arrow">
+                        <img src="{% static 'landing/assets/arrow-right.svg' %}" alt="" class="header_list-button-arrow">
                     </a>
                 </div>
             </div>
@@ -426,7 +427,7 @@
             <div class="footer_top">
                 <div class="footer_info">
                     <div class="footer_title">
-                        <img src="assets/favicon.png" alt="" class="footer_title_image">
+                        <img src="{% static 'landing/assets/favicon.png' %}" alt="" class="footer_title_image">
                         <p class="footer_title_text">PyForge</p>
                     </div>
                     <p class="footer_desc">
