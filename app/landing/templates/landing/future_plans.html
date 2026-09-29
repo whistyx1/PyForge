@@ -1,0 +1,34 @@
+{% extends 'landing/base.html' %}
+
+{% block title %}Future Plans | PyForge{% endblock %}
+
+{% block content %}
+<main class="future_plans">
+    <div class="future_plans_container">
+        <a href="{% url 'home' %}" class="future_plans_back">← Back to PyForge</a>
+        <header class="future_plans_header">
+            <p class="future_plans_topic">WHERE PYFORGE COULD GO</p>
+            <h1 class="future_plans_title">Future plans</h1>
+            <p class="future_plans_intro">
+                PyForge is being built local-first. These are ideas for how it could grow—not features that are available today.
+            </p>
+        </header>
+
+        <section class="future_plan_card" aria-labelledby="hosted-deployments-title">
+            <div class="future_plan_card_topline">
+                <span class="future_plan_status">Long-term idea</span>
+                <span class="future_plan_number" aria-hidden="true">01</span>
+            </div>
+            <h2 class="future_plan_title" id="hosted-deployments-title">An optional hosted deployment path</h2>
+            <p class="future_plan_description">
+                Today, PyForge helps you deploy to a server you control. One possible future direction is an optional hosted service, so people could deploy without finding and managing their own server.
+            </p>
+            <p class="future_plan_note">
+                A subscription could help cover hosting costs. The scope, pricing, and timeline are not decided; the local-first workflow remains the foundation.
+            </p>
+        </section>
+
+        <p class="future_plans_note">Plans may change as the project develops and people try it.</p>
+    </div>
+</main>
+{% endblock %}

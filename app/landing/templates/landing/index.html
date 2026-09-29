@@ -1,46 +1,9 @@
+{% extends 'landing/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{project_name}}</title>
-    <link rel="stylesheet" href="{% static 'landing/style.css' %}">
-    <link rel="icon" type="image/png" href="{% static 'landing/assets/favicon.png' %}?v=3">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <header class="header">
-        <div class="header_container">
-            <nav class="header_nav_bar">
-                <img src="{% static 'landing/assets/pyforge-logo.svg' %}" alt="PyForge" class="main_logo">
 
-                <ul class="header_list">
-                    <li class="header_list-item">
-                        <a href="#how-it-works" class="header_list-link">How it works</a>
-                    </li>
-                    <li class="header_list-item">
-                        <a href="#capabilities" class="header_list-link">Capabilities</a>
-                    </li>
-                    <li class="header_list-item">
-                        <a href="#supported-projects" class="header_list-link">Supported projects</a>
-                    </li>
-                    <li class="header_list-item">
-                        <a class="header_list-link">Documentation</a>
-                    </li>
-                    <li class="header_list-item">
-                        <a href="https://github.com/whistyx1/PyForge" class="header_list-link" target="_blank" rel="noopener noreferrer">GitHub</a>
-                    </li>
-                </ul>
-                <a href="" class="button button--primary">
-                    <span>Try PyForge locally</span>
-                    <img src="{% static 'landing/assets/arrow-right.svg' %}" alt="" class="header_list-button-arrow">
-                </a>
-            </nav>
-        </div>
-    </header>
+{% block title %}{{ project_name }}{% endblock %}
+
+{% block content %}
     <main class="main">
         <section class="hero">
             <div class="hero_container">
@@ -57,11 +20,11 @@
                         </p>
                     </div>
                     <div class="hero_buttons">
-                        <a href="" class="button button--primary">
+                        <a href="https://github.com/whistyx1/PyForge" class="button button--primary" target="_blank" rel="noopener noreferrer">
                             <span>Try PyForge locally</span>
                             <img src="{% static 'landing/assets/arrow-right.svg' %}" alt="" class="header_list-button-arrow">
                         </a>
-                        <a href="" class="button button--secondary">
+                        <a href="https://github.com/whistyx1/PyForge" class="button button--secondary" target="_blank" rel="noopener noreferrer">
                             <span class="header_list-button-text">View on GitHub</span>
                             <img src="{% static 'landing/assets/arrow-right.svg' %}" alt="" class="header_list-button-arrow">
                         </a>
@@ -410,11 +373,11 @@
                     </p>
                 </div>
                 <div class="cta_buttons">
-                    <a href="" class="button button--primary">
+                    <a href="https://github.com/whistyx1/PyForge" class="button button--primary" target="_blank" rel="noopener noreferrer">
                         <span>Try PyForge locally</span>
                         <img src="{% static 'landing/assets/arrow-right.svg' %}" alt="" class="header_list-button-arrow">
                     </a>
-                    <a href="" class="button button--secondary">
+                    <a href="https://github.com/whistyx1/PyForge" class="button button--secondary" target="_blank" rel="noopener noreferrer">
                         <span class="header_list-button-text">View on GitHub</span>
                         <img src="{% static 'landing/assets/arrow-right.svg' %}" alt="" class="header_list-button-arrow">
                     </a>
@@ -422,60 +385,4 @@
             </div>
         </section>
     </main>
-    <footer class="footer">
-        <div class="footer_container">
-            <div class="footer_top">
-                <div class="footer_info">
-                    <div class="footer_title">
-                        <img src="{% static 'landing/assets/favicon.png' %}" alt="" class="footer_title_image">
-                        <p class="footer_title_text">PyForge</p>
-                    </div>
-                    <p class="footer_desc">
-                        Clear, local-first deployment for Django, FastAPI, and Flask projects.
-                    </p>
-                </div>
-                <div class="footer_features">
-                    <div class="footer_product">
-                        <p class="footer_product_title">
-                            Product
-                        </p>
-                        <ul class="footer_product_list">
-                            <li class="footer_product_item">
-                                <a href="#how-it-works" class="feature_link">How it works</a>
-                            </li>
-                            <li class="footer_product_item">
-                               <a href="#capabilities" class="feature_link">Capabilities</a>
-                            </li>
-                            <li class="footer_product_item">
-                                <a href="#supported-projects" class="feature_link">Supported projects</a>
-                            </li>
-                            <li class="footer_product_item">
-                               <a class="feature_link">Future plans</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="footer_resources">
-                        <p class="footer_resources_title">
-                            Resources
-                        </p>
-                        <ul class="footer_resources_list">
-                            <li class="footer_resources_item">
-                                <a class="feature_link">Documentation</a>
-                            </li>
-                            <li class="footer_resources_item">
-                                <a href="https://github.com/whistyx1/PyForge" class="feature_link" target="_blank" rel="noopener noreferrer">GitHub</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="footer_bottom">
-                <p class="footer_phrase">
-                    YOUR PROJECT · YOUR SERVER · YOUR CONTROL
-                </p>
-                <p class="footer_name">PyForge</p>
-            </div>
-        </div>
-    </footer>
-</body>
-</html>
+{% endblock %}

@@ -49,6 +49,7 @@ a{
 
 [class*='_container']{
     max-width: 1280px;
+    width: calc(100% - 64px);
     margin-inline: auto;
 }
 
@@ -737,4 +738,414 @@ a{
 .footer_name{
     font-size: 12px;
     font-weight: 400;
+}
+
+.future_plans{
+    min-height: 70vh;
+    padding: 72px 0 96px;
+    background-color: var(--background-color);
+}
+
+.future_plans_container{
+    max-width: 900px;
+}
+
+.future_plans_back{
+    display: inline-block;
+    margin-bottom: 52px;
+    color: var(--text-blue);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.future_plans_header{
+    max-width: 720px;
+    margin-bottom: 42px;
+}
+
+.future_plans_topic{
+    margin-bottom: 16px;
+    color: var(--text-blue);
+    font-family: 'Roboto Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.future_plans_title{
+    margin-bottom: 18px;
+    font-size: clamp(40px, 6vw, 60px);
+    font-weight: 400;
+    line-height: 1.05;
+}
+
+.future_plans_intro{
+    color: var(--text-gray);
+    font-size: 19px;
+    line-height: 1.55;
+}
+
+.future_plan_card{
+    padding: 34px;
+    border: 1px solid #C9D0DA;
+    border-radius: 14px;
+    background-color: white;
+}
+
+.future_plan_card_topline{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+}
+
+.future_plan_status{
+    padding: 7px 11px;
+    border-radius: 999px;
+    background-color: #E8EFFE;
+    color: var(--text-blue);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.future_plan_number{
+    color: #AAB7CA;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 13px;
+}
+
+.future_plan_title{
+    margin-bottom: 14px;
+    font-size: 25px;
+    font-weight: 600;
+}
+
+.future_plan_description,
+.future_plan_note{
+    max-width: 720px;
+    color: var(--text-gray);
+    font-size: 16px;
+    line-height: 1.65;
+}
+
+.future_plan_note{
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid #E1E5EB;
+    font-size: 14px;
+}
+
+.future_plans_note{
+    margin-top: 22px;
+    color: var(--text-gray);
+    font-size: 13px;
+}
+
+@media (max-width: 1100px){
+    .header{
+        padding-inline: 32px;
+    }
+
+    .header_list{
+        gap: 16px;
+    }
+
+    .header_list-link{
+        font-size: 13px;
+    }
+
+    .hero_container{
+        gap: 36px;
+    }
+
+    .hero_title{
+        font-size: clamp(42px, 5.3vw, 60px);
+    }
+
+    .hero_terminal{
+        width: min(46%, 560px);
+    }
+
+    .review_container{
+        gap: 36px;
+    }
+
+    .review_content{
+        flex: 0 1 36%;
+    }
+
+    .review_plan{
+        flex: 1 1 0;
+        width: 0;
+        min-width: 0;
+    }
+
+    .faq_container{
+        grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+        column-gap: 48px;
+    }
+
+    .faq_info{
+        width: auto;
+    }
+
+    .cta{
+        padding: 64px 32px;
+    }
+
+    .cta_container{
+        gap: 32px;
+    }
+
+    .cta_buttons{
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 800px){
+    [class*='_container']{
+        width: calc(100% - 48px);
+    }
+
+    .header{
+        padding: 16px 24px;
+    }
+
+    .header_nav_bar{
+        flex-wrap: wrap;
+        row-gap: 18px;
+    }
+
+    .header_list{
+        order: 3;
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px 18px;
+    }
+
+    .header_nav_bar > .button{
+        padding: 12px 16px;
+    }
+
+    .hero_container{
+        flex-direction: column;
+        align-items: stretch;
+        padding: 64px 0;
+    }
+
+    .hero_content{
+        max-width: none;
+    }
+
+    .hero_title{
+        font-size: clamp(42px, 8vw, 58px);
+    }
+
+    .hero_desc br{
+        display: none;
+    }
+
+    .hero_terminal{
+        width: 100%;
+        max-width: 640px;
+        align-self: center;
+    }
+
+    .hero_highlights{
+        padding: 22px 24px;
+    }
+
+    .hero_highlights-list{
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 16px 28px;
+    }
+
+    .steps_container,
+    .capabilities,
+    .architecture,
+    .review,
+    .supported,
+    .faq{
+        padding-block: 72px;
+    }
+
+    .steps_list,
+    .capabilities_list,
+    .supported_list{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .architecture_cards-list{
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .review_container{
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .review_content{
+        flex: auto;
+    }
+
+    .review_plan{
+        flex: auto;
+        width: 100%;
+    }
+
+    .faq_container{
+        grid-template-columns: 1fr;
+        row-gap: 32px;
+    }
+
+    .cta{
+        padding: 56px 0;
+    }
+
+    .cta_container{
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .cta_info{
+        max-width: none;
+    }
+
+    .footer_top{
+        gap: 36px;
+    }
+}
+
+@media (max-width: 560px){
+    [class*='_container']{
+        width: calc(100% - 40px);
+    }
+
+    .header{
+        padding: 14px 20px;
+    }
+
+    .header_list{
+        justify-content: flex-start;
+        gap: 12px 16px;
+    }
+
+    .header_list-link{
+        font-size: 12px;
+    }
+
+    .header_nav_bar > .button{
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+
+    .main_logo{
+        width: 108px;
+        height: auto;
+    }
+
+    .hero_container{
+        padding: 52px 0;
+    }
+
+    .hero_title{
+        font-size: clamp(36px, 10vw, 48px);
+        line-height: 1.08;
+    }
+
+    .hero_title br{
+        display: none;
+    }
+
+    .hero_desc,
+    .capabilities_desc,
+    .architecture_desc,
+    .review_desc,
+    .supported_desc,
+    .faq_desc,
+    .cta_desc{
+        font-size: 16px;
+    }
+
+    .hero_buttons,
+    .cta_buttons{
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .hero_buttons .button,
+    .cta_buttons .button{
+        width: 100%;
+    }
+
+    .steps_container,
+    .capabilities,
+    .architecture,
+    .review,
+    .supported,
+    .faq{
+        padding-block: 56px;
+    }
+
+    .steps_title,
+    .capabilities_title,
+    .architecture_title,
+    .review_title,
+    .supported_title,
+    .faq_title,
+    .cta_title{
+        font-size: 34px;
+    }
+
+    .steps_list,
+    .capabilities_list,
+    .supported_list,
+    .architecture_cards-list{
+        grid-template-columns: 1fr;
+    }
+
+    .architecture_cards-list{
+        display: flex;
+        flex-direction: column;
+    }
+
+    .architecture_item{
+        width: 100%;
+    }
+
+    .cta{
+        padding-block: 48px;
+    }
+
+    .footer_top,
+    .footer_features{
+        flex-direction: column;
+        gap: 28px;
+    }
+
+    .footer_bottom{
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .future_plans{
+        padding-block: 48px 64px;
+    }
+
+    .future_plans_back{
+        margin-bottom: 36px;
+    }
+
+    .future_plan_card{
+        padding: 24px;
+    }
+
+    .future_plan_title{
+        font-size: 22px;
+    }
 }
