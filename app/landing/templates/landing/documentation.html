@@ -1,0 +1,111 @@
+{% extends 'landing/base.html' %}
+
+{% block title %}Documentation | PyForge{% endblock %}
+
+{% block content %}
+<main class="documentation">
+    <div class="documentation_container">
+        <a href="{% url 'home' %}" class="documentation_back">← Back to PyForge</a>
+
+        <header class="documentation_header">
+            <p class="documentation_eyebrow">PYFORGE USER GUIDE</p>
+            <h1 class="documentation_title">Deploy with clarity and control.</h1>
+            <p class="documentation_intro">
+                PyForge prepares a reviewable Docker deployment for your Python web app, then deploys it to infrastructure you control.
+            </p>
+        </header>
+
+        <aside class="documentation_callout" aria-label="PyForge deployment model">
+            <strong>Local-first by design</strong>
+            <p>
+                PyForge analyzes your project and prepares the deployment locally. Your source stays on your machine; the connection to your Linux server is made over SSH. You review and approve the plan before it makes changes.
+            </p>
+        </aside>
+
+        <section class="documentation_section">
+            <h2>What PyForge does</h2>
+            <p>
+                PyForge helps with the repetitive parts of deploying a Python web app: understanding the project, preparing Docker configuration, checking the target server, and presenting the commands in a plan you can inspect before execution.
+            </p>
+        </section>
+
+        <section class="documentation_section">
+            <h2>Supported frameworks</h2>
+            <p>PyForge is designed for common Python web projects and lets you confirm project-specific settings before deployment.</p>
+            <div class="documentation_cards">
+                <article class="documentation_card">
+                    <h3>Django</h3>
+                    <p>Detects the project and dependencies, then lets you confirm the start command, port, environment, and health check.</p>
+                    <span class="documentation_tag">Django · Docker Compose</span>
+                </article>
+                <article class="documentation_card">
+                    <h3>FastAPI</h3>
+                    <p>Supports ASGI applications. Confirm the application command, port, environment, and health-check endpoint.</p>
+                    <span class="documentation_tag">ASGI · health check</span>
+                </article>
+                <article class="documentation_card">
+                    <h3>Flask</h3>
+                    <p>Analyzes the project and lets you confirm its WSGI start command, port, and deployment settings.</p>
+                    <span class="documentation_tag">WSGI · SSH deploy</span>
+                </article>
+            </div>
+        </section>
+
+        <section class="documentation_section">
+            <h2>What you need</h2>
+            <div class="documentation_cards documentation_cards--two">
+                <article class="documentation_card">
+                    <h3>Your application</h3>
+                    <ul>
+                        <li>A Django, FastAPI, or Flask project provided as a folder, ZIP archive, or public Git repository.</li>
+                        <li>A start command, listening port, required environment variables, and health-check path to review or confirm.</li>
+                        <li>A database only if your application needs one; PostgreSQL is optional.</li>
+                    </ul>
+                </article>
+                <article class="documentation_card">
+                    <h3>Your deployment target</h3>
+                    <ul>
+                        <li>A Linux server you control.</li>
+                        <li>Docker installed on that server.</li>
+                        <li>SSH access so PyForge can run the approved deployment steps and check the server.</li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+
+        <section class="documentation_section">
+            <h2>Deployment workflow</h2>
+            <ol class="documentation_steps">
+                <li>
+                    <span>1. Connect your project</span>
+                    <p>Choose a project folder, ZIP archive, or public Git repository.</p>
+                </li>
+                <li>
+                    <span>2. Review detected settings</span>
+                    <p>Confirm the framework, dependencies, start command, port, environment variables, health check, database choice, and server target.</p>
+                </li>
+                <li>
+                    <span>3. Inspect the deployment plan</span>
+                    <p>Review the generated Dockerfile, Docker Compose configuration, and ordered server commands before anything runs.</p>
+                </li>
+                <li>
+                    <span>4. Approve and deploy</span>
+                    <p>PyForge checks the Linux server over SSH, then executes only after you approve the plan.</p>
+                </li>
+                <li>
+                    <span>5. Check the result</span>
+                    <p>Review deployment logs and the application's health status after startup.</p>
+                </li>
+            </ol>
+        </section>
+
+        <section class="documentation_section documentation_control">
+            <h2>Your project. Your server. Your control.</h2>
+            <p>
+                The default workflow targets a server you own and manage. PyForge keeps the target explicit, makes commands reviewable, and requires your approval before deployment actions are performed. PostgreSQL can be included when needed, but it is not mandatory.
+            </p>
+            <a href="{% url 'future_plans' %}" class="documentation_more">Looking for the optional hosted direction? See Future Plans →</a>
+        </section>
+    </div>
+</main>
+{% endblock %}
