@@ -7,3 +7,7 @@ def view(request):
 
 def future_plans(request):
     return render(request, 'landing/future_plans.html')
+
+
+def documentation(request):
+    return render(request, 'landing/documentation.html')
