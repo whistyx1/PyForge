@@ -11,3 +11,7 @@ def future_plans(request):
 
 def documentation(request):
     return render(request, 'landing/documentation.html')
+
+
+def deployment_setup(request):
+    return render(request, 'landing/deployment_setup.html')
