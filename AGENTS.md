@@ -9,7 +9,8 @@ The current application is a Django site in `app/`. It serves a landing page, do
 ## Repository map
 
 - `app/config/`: Django settings and root URL configuration.
-- `app/landing/`: page views, templates, static assets, and tests.
+- `app/landing/`: page views, templates, and static assets.
+- `tests/`: Django page tests and Node-based setup-screen validation tests.
 - `app/landing/static/landing/deployment_setup.js`: client-side setup interactions.
 - `examples/`: small Django, FastAPI, and Flask applications for future analyzer and deployment work.
 - `docs/pyforge-product-plan.md`: intended workflows, architecture, and milestones.
@@ -28,7 +29,9 @@ python app/manage.py migrate
 python app/manage.py runserver
 ```
 
-Run Django checks with `python app/manage.py check` and application tests with `python app/manage.py test landing`. Use the matching example application's own requirements when working inside `examples/`.
+Run Django checks with `python app/manage.py check` and application tests with `python app/manage.py test tests`. Use the matching example application's own requirements when working inside `examples/`.
+
+Run setup-screen JavaScript validation tests with `node --test tests/*.test.cjs`.
 
 ## Implementation guidance
 
