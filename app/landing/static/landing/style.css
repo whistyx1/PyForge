@@ -426,11 +426,12 @@ a{
     height: auto;
 }
 
-.review_topic{
+.review_topic,
+.supported_topic,
+.faq_info-topic{
     display: flex;
     align-items: center;
     gap: 8px;
-
     color: var(--text-blue);
     font-size: 12px;
     font-weight: bold;
@@ -438,19 +439,26 @@ a{
     margin-bottom: 16px;
 }
 
-.review_title{
+.review_title,
+.supported_title,
+.faq_title{
     font-size: 42px;
     font-weight: 400;
     line-height: 1.1;
     margin-bottom: 16px;
 }
 
-.review_desc{
+.review_desc,
+.supported_desc,
+.faq_desc{
     font-size: 19px;
-    font-weight: 400;
     line-height: 1.55;
-    margin-bottom: 28px;
     color: var(--text-gray);
+}
+
+.review_desc{
+    font-weight: 400;
+    margin-bottom: 28px;
 }
 
 .review_benefits-list{
@@ -474,29 +482,7 @@ a{
     padding: 96px 0;
 }
 
-.supported_topic{
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    color: var(--text-blue);
-    font-family: 'Roboto mono', monospace;
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 16px;
-}
-
-.supported_title{
-    font-weight: 400;
-    font-size: 42px;
-    line-height: 1.1;
-    margin-bottom: 16px;
-}
-
 .supported_desc{
-    font-size: 19px;
-    line-height: 1.55;
-    color: var(--text-gray);
     margin-bottom: 46px;
 }
 
@@ -568,30 +554,8 @@ a{
     height: auto;
 }
 
-.faq_info-topic{
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    color: var(--text-blue);
-    font-size: 12px;
-    font-weight: bold;
-    font-family: 'Roboto mono', monospace;
-    margin-bottom: 16px;
-}
-
-.faq_title{
-    font-size: 42px;
-    font-weight: 400;
-    line-height: 1.1;
-    margin-bottom: 16px;
-}
-
 .faq_desc{
-    font-size: 19px;
-    color: var(--text-gray);
     font-weight: 400;
-    line-height: 1.55;
 }
 
 .faq_list-item{
@@ -740,22 +704,33 @@ a{
     font-weight: 400;
 }
 
-.future_plans{
+.future_plans,
+.documentation,
+.deployment_setup{
     min-height: 70vh;
-    padding: 72px 0 96px;
     background-color: var(--background-color);
+}
+
+.future_plans,
+.documentation{
+    padding: 72px 0 96px;
 }
 
 .future_plans_container{
     max-width: 900px;
 }
 
-.future_plans_back{
+.future_plans_back,
+.documentation_back,
+.deployment_setup_back{
     display: inline-block;
-    margin-bottom: 52px;
     color: var(--text-blue);
     font-size: 14px;
     font-weight: 600;
+}
+
+.future_plans_back{
+    margin-bottom: 52px;
 }
 
 .future_plans_header{
@@ -763,7 +738,8 @@ a{
     margin-bottom: 42px;
 }
 
-.future_plans_topic{
+.future_plans_topic,
+.documentation_eyebrow{
     margin-bottom: 16px;
     color: var(--text-blue);
     font-family: 'Roboto Mono', monospace;
@@ -779,7 +755,8 @@ a{
     line-height: 1.05;
 }
 
-.future_plans_intro{
+.future_plans_intro,
+.documentation_intro{
     color: var(--text-gray);
     font-size: 19px;
     line-height: 1.55;
@@ -841,22 +818,12 @@ a{
     font-size: 13px;
 }
 
-.documentation{
-    min-height: 70vh;
-    padding: 72px 0 96px;
-    background-color: var(--background-color);
-}
-
 .documentation_container{
     max-width: 1000px;
 }
 
 .documentation_back{
-    display: inline-block;
     margin-bottom: 48px;
-    color: var(--text-blue);
-    font-size: 14px;
-    font-weight: 600;
 }
 
 .documentation_header{
@@ -864,26 +831,11 @@ a{
     margin-bottom: 32px;
 }
 
-.documentation_eyebrow{
-    margin-bottom: 16px;
-    color: var(--text-blue);
-    font-family: 'Roboto Mono', monospace;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
 .documentation_title{
     margin-bottom: 16px;
     font-size: clamp(40px, 6vw, 58px);
     font-weight: 400;
     line-height: 1.05;
-}
-
-.documentation_intro{
-    color: var(--text-gray);
-    font-size: 19px;
-    line-height: 1.55;
 }
 
 .documentation_callout{
@@ -1043,9 +995,7 @@ a{
 }
 
 .deployment_setup{
-    min-height: 70vh;
     padding: 64px 0 96px;
-    background-color: var(--background-color);
 }
 
 .deployment_setup_container{
@@ -1053,11 +1003,7 @@ a{
 }
 
 .deployment_setup_back{
-    display: inline-block;
     margin-bottom: 36px;
-    color: var(--text-blue);
-    font-size: 14px;
-    font-weight: 600;
 }
 
 .deployment_setup_header{
@@ -1166,6 +1112,7 @@ a{
     border: 1px dashed #AEB9C8;
     border-radius: 10px;
     background-color: #FAFBFD;
+    cursor: default;
 }
 
 .deployment_source-title{
@@ -1200,6 +1147,7 @@ a{
     align-self: flex-start;
     margin-top: 5px;
     padding: 9px 12px;
+    border-color: #C9D0DA;
     font-size: 12px;
     cursor: pointer;
 }
@@ -1266,14 +1214,6 @@ a{
 .deployment_remove-files:hover{
     color: #7C2626;
     text-decoration: underline;
-}
-
-.deployment_folder-button{
-    border-color: #C9D0DA;
-}
-
-.deployment_source-option{
-    cursor: default;
 }
 
 .deployment_folder-button:hover{
