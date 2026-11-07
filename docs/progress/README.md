@@ -18,8 +18,9 @@ This log records work completed in the repository. The product roadmap remains i
 - Verification: rebuilt `pyforge:0.1.0`; missing production settings fail at startup, configured production and local development checks pass, SQLite migrations run as the container user, and the homepage and stylesheet return HTTP 200 in production mode.
 - Added a Compose service with a persistent SQLite volume and a private environment file. The local Compose configuration validated, migrations completed, and the website loaded on localhost.
 - Added Terraform for the VPC, public subnet, SSH access, and Ubuntu EC2 instance. Terraform applied 10 resources; the instance was later replaced to use a new project SSH key. Docker Engine and Compose were installed and verified on the instance.
+- Stopped and then destroyed the 10 Terraform-managed lab resources to prepare for a fresh Ansible provisioning test. Terraform state is empty.
 
 ## Next step
 
-- Transfer the project to EC2, configure its private environment values, and run Compose there. Add a public web entry point and HTTPS before exposing the site.
+- Write an Ansible playbook for server configuration, recreate the EC2 stack with Terraform, then test provisioning on the fresh instance. Add a public web entry point and HTTPS before exposing the site.
 - Connect project intake to backend validation and analysis, then build the review flow described in the product plan.
