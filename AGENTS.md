@@ -47,4 +47,4 @@ Run setup-screen JavaScript validation tests with `node --test tests/*.test.cjs`
 
 ## Current development settings
 
-`app/config/settings.py` contains development defaults, including `DEBUG = True` and a checked-in secret key. Do not use these settings for a network-exposed or production deployment. Do not assume that the deployment claims on the landing page are implemented.
+`app/config/settings.py` defaults to development mode for local commands. The container defaults to `DJANGO_DEBUG=false` and requires `DJANGO_SECRET_KEY` and `DJANGO_ALLOWED_HOSTS` at runtime. Its SQLite path defaults to `/data/db.sqlite3`; mount persistent storage at `/data` before deployment. Do not assume that the deployment claims on the landing page are implemented.

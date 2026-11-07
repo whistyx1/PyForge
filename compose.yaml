@@ -1,0 +1,13 @@
+services:
+  web:
+    build: .
+    image: pyforge:0.1.0
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - pyforge_data:/data
+
+volumes:
+  pyforge_data:
