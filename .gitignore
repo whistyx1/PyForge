@@ -1,11 +1,22 @@
+AGENTS.md
+
+#Ignore Python cache files
 __pycache__
 .venv
 /.env
 /app/staticfiles/
+
+#docs folder
 /docs/*
 !/docs/progress/
-/infra/.terraform/
+
+#terraform scripts
+/infra/terraform/.terraform/
+/infra/terraform/*.tfstate
+/infra/terraform/*.tfstate.*
+/infra/terraform/*.tfvars
+/infra/terraform/*.tfplan
+
+#additional safeguard
 /infra/*.tfstate
 /infra/*.tfstate.*
-/infra/*.tfvars
-/infra/*.tfplan
