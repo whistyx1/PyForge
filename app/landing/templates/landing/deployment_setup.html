@@ -1,0 +1,151 @@
+{% extends 'landing/base.html' %}
+{% load static %}
+
+{% block title %}Try PyForge | PyForge{% endblock %}
+
+{% block content %}
+<main class="deployment_setup">
+    <div class="deployment_setup_container">
+        <a href="{% url 'home' %}" class="deployment_setup_back">← Back to PyForge</a>
+
+        <header class="deployment_setup_header">
+            <p class="deployment_setup_eyebrow">START A DEPLOYMENT</p>
+            <h1 class="deployment_setup_title">Connect your project and server.</h1>
+            <p class="deployment_setup_intro">
+                Choose a project source and tell PyForge where you want to deploy. You’ll review the detected settings and deployment plan before anything runs.
+            </p>
+        </header>
+
+        <div class="deployment_setup_layout">
+            <div class="deployment_setup_form">
+                <section class="deployment_setup_section" aria-labelledby="project-source-title">
+                    <div class="deployment_setup_section-heading">
+                        <span class="deployment_setup_step">01</span>
+                        <div>
+                            <h2 id="project-source-title">Project source</h2>
+                            <p>Choose a local folder or provide a Git repository URL.</p>
+                        </div>
+                    </div>
+
+                    <div class="deployment_source-options">
+                        <div class="deployment_source-option">
+                            <span class="deployment_source-title">Choose project folder</span>
+                            <span class="deployment_source-help">Select the folder containing your Python app.</span>
+                            <input class="deployment_folder-input" id="project-folder" type="file" webkitdirectory directory multiple aria-describedby="folder-selection-hint folder-selection-status">
+                            <label class="button button--secondary deployment_folder-button" for="project-folder">Choose folder</label>
+                            <p class="deployment_folder-hint" id="folder-selection-hint">Choose the project’s root folder. It should contain at least one <code>.py</code> file.</p>
+                            <p class="deployment_folder-status" id="folder-selection-status" aria-live="polite">No folder selected</p>
+                            <button class="deployment_remove-files" id="remove-project-folder" type="button" hidden>Remove selected files</button>
+                        </div>
+
+                        <div class="deployment_source-divider"><span>OR</span></div>
+
+                        <div class="deployment_source-option deployment_repository-option">
+                            <span class="deployment_source-title">GitHub repository</span>
+                            <span class="deployment_source-help">Add a public repository URL.</span>
+                            <div class="deployment_repository-entry" id="repository-entry">
+                                <input id="repository-url" type="url" placeholder="https://github.com/owner/project.git" autocomplete="url" aria-label="GitHub repository URL">
+                                <button class="button button--secondary deployment_repository-add" id="add-repository" type="button">Add repository</button>
+                            </div>
+                            <div class="deployment_repository-selected" id="repository-selected" hidden>
+                                <span class="deployment_repository-value" id="repository-value"></span>
+                                <button class="deployment_remove-files" id="remove-repository" type="button">Remove repository</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="deployment_source-overall" id="project-source-status" role="status" aria-live="polite">
+                        <span class="deployment_source-status-dot" aria-hidden="true"></span>
+                        <span id="project-source-status-text">No project source added</span>
+                    </div>
+                </section>
+
+                <section class="deployment_setup_section" aria-labelledby="server-target-title">
+                    <div class="deployment_setup_section-heading">
+                        <span class="deployment_setup_step">02</span>
+                        <div>
+                            <h2 id="server-target-title">Server target</h2>
+                            <p>Connect to a Linux server you control.</p>
+                        </div>
+                    </div>
+
+                    <div class="deployment_server-fields">
+                        <div class="deployment_field-group deployment_field-group--wide">
+                            <label class="deployment_field" for="server-host">
+                                <span>Server IP address or hostname</span>
+                            </label>
+                            <div class="deployment_field-control-row">
+                                <input id="server-host" type="text" placeholder="203.0.113.10 or server.example.com" autocomplete="off" aria-describedby="server-host-error" required>
+                                <button class="deployment_field-action" type="button" data-server-field="host" aria-pressed="false">Add</button>
+                            </div>
+                            <p class="deployment_field-error" id="server-host-error" hidden></p>
+                        </div>
+                        <div class="deployment_field-group">
+                            <label class="deployment_field" for="ssh-user">
+                                <span>SSH username</span>
+                            </label>
+                            <div class="deployment_field-control-row">
+                                <input id="ssh-user" type="text" placeholder="deploy" autocomplete="username" aria-describedby="ssh-user-error" required maxlength="32">
+                                <button class="deployment_field-action" type="button" data-server-field="username" aria-pressed="false">Add</button>
+                            </div>
+                            <p class="deployment_field-error" id="ssh-user-error" hidden></p>
+                        </div>
+                        <div class="deployment_field-group">
+                            <label class="deployment_field" for="ssh-port">
+                                <span>SSH port</span>
+                            </label>
+                            <div class="deployment_field-control-row">
+                                <input id="ssh-port" type="number" placeholder="22" min="1" max="65535" inputmode="numeric" aria-describedby="ssh-port-error" required>
+                                <button class="deployment_field-action" type="button" data-server-field="port" aria-pressed="false">Add</button>
+                            </div>
+                            <p class="deployment_field-error" id="ssh-port-error" hidden></p>
+                        </div>
+                        <div class="deployment_field-group deployment_field-group--wide">
+                            <label class="deployment_field" for="deploy-path">
+                                <span>Application directory <small>(optional)</small></span>
+                            </label>
+                            <div class="deployment_field-control-row">
+                                <input id="deploy-path" type="text" placeholder="~/apps/my-project" autocomplete="off" aria-describedby="deploy-path-error">
+                                <button class="deployment_field-action" type="button" data-server-field="path" aria-pressed="false">Add</button>
+                            </div>
+                            <p class="deployment_field-error" id="deploy-path-error" hidden></p>
+                        </div>
+                    </div>
+
+                    <div class="deployment_server-summary">
+                        <h3>Added server details</h3>
+                        <dl id="server-target-summary" aria-live="polite">
+                            <div class="deployment_server-summary-empty"><dt>Status</dt><dd>No server details added</dd></div>
+                        </dl>
+                    </div>
+
+                    <aside class="deployment_security-note">
+                        <img src="{% static 'landing/assets/lock-keyhole-open.svg' %}" alt="" width="18" height="18">
+                        <p>SSH authentication should use the client’s local SSH agent. Don’t paste or upload a private key here.</p>
+                    </aside>
+                </section>
+
+                <div class="deployment_setup_actions">
+                    <button class="button button--primary" type="button" disabled>Review deployment plan</button>
+                    <p>Next, PyForge will detect the framework and ask you to confirm the app settings.</p>
+                </div>
+            </div>
+
+            <aside class="deployment_setup_preview">
+                <div class="deployment_preview-heading">
+                    <p class="deployment_setup_eyebrow">YOUR FLOW</p>
+                    <h2>Review first. Deploy when you’re ready.</h2>
+                </div>
+                <ol class="deployment_preview-steps">
+                    <li><span>1</span><div><strong>Analyze</strong><small>Detect framework and app settings</small></div></li>
+                    <li><span>2</span><div><strong>Review</strong><small>Inspect generated files and commands</small></div></li>
+                    <li><span>3</span><div><strong>Approve & deploy</strong><small>Connect over SSH and monitor logs</small></div></li>
+                </ol>
+                <img src="{% static 'landing/assets/terminal-preview.png' %}" alt="Example preview of deployment output in a terminal" class="deployment_terminal-preview">
+                <p class="deployment_preview-caption">The deployment view will show progress, logs, and health checks.</p>
+            </aside>
+        </div>
+    </div>
+</main>
+<script src="{% static 'landing/deployment_setup.js' %}" defer></script>
+{% endblock %}
