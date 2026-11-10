@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+image_tag="${1:?Usage: pyforge-deploy <image_tag>}"
+
+secret_key="$(aws ssm get-parameter \
+  --region us-east-1 \
+  --name /pyforge/production/DJANGO_SECRET_KEY \
+  --with-decryption \
+  --query 'Parameter.Value' \
+  --output text)"
+
+export PYFORGE_IMAGE_TAG="${image_tag}"
+export DJANGO_SECRET_KEY="${secret_key}"
+
+cd /opt/pyforge || exit 1
+docker compose pull
+docker compose up -d --remove-orphans

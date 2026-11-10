@@ -1,0 +1,16 @@
+services:
+  web:
+    image: ghcr.io/whistyx1/pyforge:${PYFORGE_IMAGE_TAG}
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - pyforge_data:/data
+
+    restart: unless-stopped
+
+    environment:
+      DJANGO_SECRET_KEY: "${DJANGO_SECRET_KEY:?DJANGO_SECRET_KEY must be set}"
+      DJANGO_ALLOWED_HOSTS: "localhost, 127.0.0.1"
+
+volumes:
+  pyforge_data:

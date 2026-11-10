@@ -1,0 +1,81 @@
+- name: Configure PyForge server
+  hosts: pyforge
+  become: true
+
+  tasks:
+    - name: Install Docker repository prerequisites
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+          - python3-debian
+          - unzip
+        state: present
+        update_cache: true
+
+    - name: Add Docker apt repository
+      ansible.builtin.deb822_repository:
+        name: docker
+        types: deb
+        uris: https://download.docker.com/linux/ubuntu
+        suites: "{{ ansible_facts['distribution_release'] }}"
+        components: stable
+        signed_by: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Install Docker Engine and Compose
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: true
+
+    - name: Download AWS CLI Installer
+      ansible.builtin.get_url:
+        url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+        dest: /tmp/awscliv2.zip
+        mode: '0644'
+
+    - name: Unpack AWS CLI Installer
+      ansible.builtin.unarchive:
+        src: /tmp/awscliv2.zip
+        dest: /tmp/
+        remote_src: true
+        creates: /tmp/aws/install
+
+    - name: Install AWS CLI
+      ansible.builtin.command:
+        cmd: /tmp/aws/install --install-dir /usr/local/aws-cli --bin-dir /usr/local/bin
+        creates: /usr/local/bin/aws
+
+    - name: Start Docker and enable it at boot
+      ansible.builtin.systemd_service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Create PyForge directory
+      ansible.builtin.file:
+        state: directory
+        path: /opt/pyforge
+        owner: root
+        mode: '0755'
+
+    - name: Create Compose for Server
+      ansible.builtin.template:
+        src: templates/compose.yaml.j2
+        dest: /opt/pyforge/compose.yaml
+        owner: root
+        mode: '0644'
+
+    - name: Install PyForge deploy script
+      ansible.builtin.copy:
+        src: files/pyforge-deploy
+        dest: /usr/local/bin/pyforge-deploy
+        owner: root
+        group: root
+        mode: '0750'
