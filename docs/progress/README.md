@@ -25,11 +25,11 @@ This log records work completed in the repository. The product roadmap remains i
 - Reorganized Terraform configuration under `infra/terraform/` and added the EC2 instance role permissions for SSM, GitHub Actions OIDC, and the Django secret in Parameter Store.
 - Added Ansible dynamic inventory and server configuration for Docker, Docker Compose, AWS CLI, the server Compose file, and the deployment script. Ansible completed successfully against the running EC2 instance.
 - Added a GitHub Actions workflow that runs checks, publishes an image tagged by commit SHA, stores the Django secret as a SecureString parameter, and invokes the deploy script through SSM.
-- The deployment workflow is committed and pushed to `feature/local-deployment-setup-page`; it has not been merged or run. The GHCR package must be made public before EC2 can pull the image anonymously.
-- The container still binds to localhost on the server. Public access and HTTPS remain to be configured.
+- Merged the deployment branch into `main`. The first main-branch workflow run passed its test, publish, and deploy jobs; the EC2 deploy script pulled the image and started the Compose service successfully.
+- The container still binds to localhost on the server. Public access and HTTPS remain to be configured; the live site has not yet been checked through a browser or SSH tunnel.
 
 ## Next step
 
-- Merge the deployment branch, run its CI and first image publication, make the GHCR package public, and complete the first deployment.
 - Add a public web entry point and HTTPS before exposing the site.
+- Walk through the Terraform, Ansible, Docker, and GitHub Actions code line by line, as requested.
 - Connect project intake to backend validation and analysis, then build the review flow described in the product plan.
