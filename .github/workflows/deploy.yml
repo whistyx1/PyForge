@@ -1,0 +1,101 @@
+name: "CI and deploy"
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v7
+            - name: Set up Python 3.13
+              uses: actions/setup-python@v7
+              with:
+                  python-version: '3.13'
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install -r requirements.txt
+            - name: Run tests
+              run: |
+                  python app/manage.py check
+                  python app/manage.py test tests
+                  node --test tests/*test.cjs
+    publish:
+        runs-on: ubuntu-latest
+        needs: test
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        permissions:
+            contents: read
+            packages: write
+        steps:
+            - uses: actions/checkout@v7
+            - name: Log in to GHCR
+              uses: docker/login-action@v4
+              with:
+                registry: ghcr.io
+                username: ${{ github.actor }}
+                password: ${{ secrets.GITHUB_TOKEN }}
+            - name: Build and push Docker image
+              uses: docker/build-push-action@v7
+              with:
+                context: .
+                file: Dockerfile
+                push: true
+                tags: ghcr.io/${{ github.repository_owner }}/pyforge:${{ github.sha}}
+                labels: |
+                    org.opencontainers.image.source=https://github.com/whistyx1/PyForge
+
+    deploy:
+        runs-on: ubuntu-latest
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        needs: publish
+        permissions:
+            contents: read
+            id-token: write
+        steps:
+            - uses: actions/checkout@v7
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v6.3.0
+              with:
+                role-to-assume: arn:aws:iam::266294231268:role/pyforge-github-deploy
+                aws-region: us-east-1
+
+            - name: Copy GitHub secret to Parameter Store
+              env:
+                DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+              run: |
+                aws ssm put-parameter \
+                    --name /pyforge/production/DJANGO_SECRET_KEY \
+                    --value "${DJANGO_SECRET_KEY}" \
+                    --type SecureString \
+                    --overwrite \
+                    --region us-east-1
+
+            - name: Deploy with SSM
+              run: |
+
+                instance_id="$(aws ec2 describe-instances \
+                --region us-east-1 \
+                --filters "Name=tag:Name,Values=pyforge-lab-server" "Name=instance-state-name,Values=running" \
+                --query 'Reservations[0].Instances[0].InstanceId' \
+                --output text)"
+
+                command_id="$(aws ssm send-command \
+                    --instance-ids "$instance_id" \
+                    --document-name "AWS-RunShellScript" \
+                    --comment "Deploy PyForge" \
+                    --parameters "commands=[\"/usr/local/bin/pyforge-deploy ${GITHUB_SHA}\"]" \
+                    --region us-east-1 \
+                    --query 'Command.CommandId' \
+                    --output text)"
+
+                aws ssm wait command-executed \
+                    --command-id "$command_id" \
+                    --instance-id "$instance_id" \
+                    --region us-east-1
