@@ -1,0 +1,19 @@
+{
+    default_sni {{ ansible_host }}
+}
+
+http://{{ ansible_host }} {
+    handle /.well-known/acme-challenge/* {
+        root * /var/www/certbot
+        file_server
+    }
+
+    handle {
+        redir https://{{ ansible_host }}{uri} permanent
+    }
+}
+
+https://{{ ansible_host }} {
+    tls /etc/caddy/certs/fullchain.pem /etc/caddy/certs/privkey.pem
+    reverse_proxy 127.0.0.1:8000
+}

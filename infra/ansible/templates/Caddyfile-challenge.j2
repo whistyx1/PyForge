@@ -1,0 +1,10 @@
+:80 {
+    handle /.well-known/acme-challenge/* {
+        root * /var/www/certbot
+        file_server
+    }
+
+    handle {
+        respond "Not Found" 404
+    }
+}

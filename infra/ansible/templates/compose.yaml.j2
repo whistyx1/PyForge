@@ -10,7 +10,7 @@ services:
 
     environment:
       DJANGO_SECRET_KEY: "${DJANGO_SECRET_KEY:?DJANGO_SECRET_KEY must be set}"
-      DJANGO_ALLOWED_HOSTS: "localhost, 127.0.0.1"
+      DJANGO_ALLOWED_HOSTS: "{{ ansible_host }},localhost,127.0.0.1"
 
 volumes:
   pyforge_data:

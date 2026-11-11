@@ -79,3 +79,143 @@
         owner: root
         group: root
         mode: '0750'
+
+    - name: Add Caddy repository
+      ansible.builtin.deb822_repository:
+        name: caddy
+        types: deb
+        uris: https://dl.cloudsmith.io/public/caddy/stable/deb/debian
+        suites: any-version
+        components: main
+        signed_by: https://dl.cloudsmith.io/public/caddy/stable/gpg.key
+        state: present
+
+    - name: Install Caddy package
+      ansible.builtin.apt:
+        name: caddy
+        state: present
+        update_cache: true
+
+    - name: Start Caddy and enable it at boot
+      ansible.builtin.systemd_service:
+        name: caddy
+        state: started
+        enabled: true
+
+    - name: Create Certbot webroot
+      ansible.builtin.file:
+        state: directory
+        path: /var/www/certbot
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Check whether the current IP certificate exists
+      ansible.builtin.stat:
+        path: "/etc/letsencrypt/live/{{ ansible_host }}/fullchain.pem"
+      register: pyforge_ip_certificate
+
+    - name: Install temporary Caddy challenge configuration
+      ansible.builtin.template:
+        src: templates/Caddyfile-challenge.j2
+        dest: /etc/caddy/Caddyfile
+        owner: root
+        mode: '0644'
+      when: not pyforge_ip_certificate.stat.exists
+
+    - name: Reload Caddy for the HTTP certificate challenge
+      ansible.builtin.systemd_service:
+        name: caddy
+        state: reloaded
+      when: not pyforge_ip_certificate.stat.exists
+
+    - name: Install Certbot dependencies
+      ansible.builtin.apt:
+        name:
+          - python3-venv
+          - python3-dev
+          - libaugeas-dev
+          - gcc
+        state: present
+        update_cache: true
+
+    - name: Install Certbot in a virtual environment
+      ansible.builtin.pip:
+        name: "certbot>=5.4"
+        state: present
+        virtualenv: /opt/certbot
+        virtualenv_command: python3 -m venv
+
+    - name: Create Certbot symlink
+      ansible.builtin.file:
+        src: /opt/certbot/bin/certbot
+        dest: /usr/local/bin/certbot
+        state: link
+
+    - name: Create Caddy certificate directory
+      ansible.builtin.file:
+        path: /etc/caddy/certs
+        state: directory
+        owner: root
+        group: caddy
+        mode: '0750'
+
+    - name: Install Certbot Caddy deploy hook
+      ansible.builtin.copy:
+        src: files/pyforge-certbot-deploy
+        dest: /usr/local/bin/pyforge-certbot-deploy
+        owner: root
+        group: root
+        mode: '0750'
+
+    - name: Request certificate for the server IP
+      ansible.builtin.command:
+        cmd: >-
+          /usr/local/bin/certbot certonly
+          --non-interactive
+          --agree-tos
+          --register-unsafely-without-email
+          --preferred-profile shortlived
+          --webroot
+          --webroot-path /var/www/certbot
+          --ip-address {{ ansible_host }}
+          --cert-name {{ ansible_host }}
+          --deploy-hook /usr/local/bin/pyforge-certbot-deploy
+        creates: "/etc/letsencrypt/live/{{ ansible_host }}/fullchain.pem"
+      when: not pyforge_ip_certificate.stat.exists
+
+    - name: Install Caddy HTTPS configuration
+      ansible.builtin.template:
+        src: templates/Caddyfile.j2
+        dest: /etc/caddy/Caddyfile
+        owner: root
+        group: root
+        mode: '0644'
+      register: pyforge_caddyfile
+
+    - name: Reload Caddy with HTTPS configuration
+      ansible.builtin.systemd_service:
+        name: caddy
+        state: reloaded
+      when: pyforge_caddyfile.changed
+
+    - name: Install Certbot renewal service
+      ansible.builtin.template:
+        src: templates/certbot-renew.service.j2
+        dest: /etc/systemd/system/certbot-renew.service
+        owner: root
+        mode: '0644'
+
+    - name: Install Certbot renewal timer
+      ansible.builtin.template:
+        src: templates/certbot-renew.timer.j2
+        dest: /etc/systemd/system/certbot-renew.timer
+        owner: root
+        mode: '0644'
+
+    - name: Enable and start Certbot renewal timer
+      ansible.builtin.systemd_service:
+        name: certbot-renew.timer
+        daemon_reload: true
+        enabled: true
+        state: started

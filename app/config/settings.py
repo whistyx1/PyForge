@@ -37,6 +37,9 @@ ALLOWED_HOSTS = [
 if not DEBUG and not ALLOWED_HOSTS:
     raise ImproperlyConfigured('DJANGO_ALLOWED_HOSTS is required when DJANGO_DEBUG=false')
 
+# Caddy terminates HTTPS and forwards the original protocol to this loopback-only app.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 # Application definition
 
