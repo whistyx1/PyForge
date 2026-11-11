@@ -28,8 +28,16 @@ This log records work completed in the repository. The product roadmap remains i
 - Merged the deployment branch into `main`. The first main-branch workflow run passed its test, publish, and deploy jobs; the EC2 deploy script pulled the image and started the Compose service successfully.
 - The container still binds to localhost on the server. Public access and HTTPS remain to be configured; the live site has not yet been checked through a browser or SSH tunnel.
 
+## 2026-11-11
+
+- Added Terraform security-group rules for public HTTP and HTTPS, and pinned the existing Ubuntu AMI so a future AMI update does not replace the server unexpectedly.
+- Extended Ansible to install Caddy and Certbot, serve the ACME HTTP challenge, request a short-lived Let's Encrypt certificate for the EC2 public IP, and configure Caddy to proxy HTTPS traffic to the loopback-only Django container.
+- Added a Certbot systemd timer and deploy hook. The hook copies the renewed certificate and private key into a Caddy-readable directory with restricted permissions, then reloads Caddy.
+- Configured Caddy's default SNI for direct IP access and Django's trusted proxy header. Updated the server Compose template with the public IP in `DJANGO_ALLOWED_HOSTS`.
+- GitHub Actions passed its checks, published the commit-tagged image, and deployed it through AWS Systems Manager. The public HTTPS homepage returned HTTP 200; the container remains bound to `127.0.0.1:8000`, behind Caddy.
+- Verification: Ansible syntax check and playbook succeeded; Caddy and the Certbot renewal timer are active; the installed certificate contains the EC2 IP and has a one-week validity period; `curl -I https://18.207.181.130` returned HTTP 200.
+
 ## Next step
 
-- Add a public web entry point and HTTPS before exposing the site.
-- Walk through the Terraform, Ansible, Docker, and GitHub Actions code line by line, as requested.
+- Walk through the Terraform, Ansible, Docker, Caddy, Certbot, and GitHub Actions configuration line by line, as requested.
 - Connect project intake to backend validation and analysis, then build the review flow described in the product plan.
