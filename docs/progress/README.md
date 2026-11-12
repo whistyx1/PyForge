@@ -39,13 +39,12 @@ This log records work completed in the repository. The product roadmap remains i
 
 ## 2026-11-12
 
-- Prepared a DuckDNS migration for `pyforge.duckdns.org`: Ansible will update the DNS record from EC2 metadata, Caddy will manage HTTPS for the hostname, and Django will accept it as a host.
-- Added narrowly scoped Parameter Store access for the DuckDNS token and a GitHub Actions step to store the repository secret as a SecureString. The updater reads the token from Parameter Store; it is not kept in the repository.
-- Replaced the Certbot configuration in Ansible with a systemd DuckDNS updater timer. The migration has not been applied; the site remains live at its EC2 IP while the DuckDNS secret and Terraform IAM update are pending.
-- Verification: Ansible syntax check, Terraform formatting and validation, updater shell syntax, and `git diff --check` passed.
+- Migrated the public site to `https://pyforge.duckdns.org`. Ansible updates DuckDNS from EC2 metadata, Caddy manages the hostname's HTTPS certificate, and Django allows the hostname.
+- Added narrowly scoped Parameter Store access for the DuckDNS token. GitHub Actions stores the repository secret as a SecureString; the EC2 updater reads it from Parameter Store and the token is not kept in the repository.
+- Replaced Certbot's IP-certificate timer with a systemd DuckDNS updater timer that runs on boot and every five minutes. The previous Certbot renewal timer is disabled.
+- Verification: GitHub Actions test, publish, and deploy jobs passed; Ansible completed with no failures; `https://pyforge.duckdns.org` returned HTTP 200 and HTTP redirected to HTTPS; the DuckDNS timer is active. Terraform formatting and validation, Ansible syntax, shell syntax, and `git diff --check` passed.
 
 ## Next step
 
-- Add the `DUCKDNS_TOKEN` GitHub Actions secret, review and apply the Terraform IAM policy change, then push the workflow and run Ansible to switch the live hostname and HTTPS certificate.
 - Walk through the Terraform, Ansible, Docker, Caddy, DuckDNS, and GitHub Actions configuration line by line, as requested.
 - Connect project intake to backend validation and analysis, then build the review flow described in the product plan.
