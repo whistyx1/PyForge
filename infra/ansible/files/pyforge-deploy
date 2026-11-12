@@ -65,8 +65,19 @@ if [[ "$(docker image inspect --format '{{if .Config.Healthcheck}}present{{else}
   exit 1
 fi
 
+if ! docker compose stop web; then
+  echo "Deployment aborted: could not stop the web service before migration" >&2
+  exit 1
+fi
+
+if ! docker compose run --rm --no-deps --pull never -T web python manage.py migrate --noinput; then
+  echo "Database migration failed. Web remains stopped; manual intervention is required before restarting it." >&2
+  exit 1
+fi
+
 if ! docker compose up -d --remove-orphans --wait --wait-timeout 60; then
   echo "Deployment of ${image_tag} failed readiness checks" >&2
+  echo "Database migrations were not reversed; image rollback requires backward-compatible migrations." >&2
   docker compose ps web >&2 || true
   docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}health check unavailable{{end}}' pyforge-web-1 >&2 || true
   if [[ -n "${rollback_tag}" ]]; then

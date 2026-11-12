@@ -9,6 +9,7 @@ __pycache__
 #docs folder
 /docs/*
 !/docs/progress/
+!/docs/runbooks/
 
 #terraform scripts
 /infra/terraform/.terraform/

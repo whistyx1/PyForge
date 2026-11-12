@@ -1,0 +1,138 @@
+#!/usr/bin/env bash
+set -euo pipefail
+umask 077
+
+mode="${1:?Usage: pyforge-backup backup | verify <S3 object key>}"
+if [[ "${mode}" != backup && "${mode}" != verify ]]; then
+  echo "Usage: pyforge-backup backup | verify <S3 object key>" >&2
+  exit 2
+fi
+if [[ "${mode}" == verify && $# -ne 2 ]]; then
+  echo "Usage: pyforge-backup verify <S3 object key>" >&2
+  exit 2
+fi
+if [[ "${mode}" == backup && $# -ne 1 ]]; then
+  echo "Usage: pyforge-backup backup | verify <S3 object key>" >&2
+  exit 2
+fi
+
+if [[ "${mode}" == verify ]]; then
+  key="$2"
+  if [[ ! "${key}" =~ ^backups/[A-Za-z0-9._/-]+\.sqlite3$ || "${key}" == *..* || "${key}" == *//* ]]; then
+    echo "Backup key must be a SQLite snapshot path under backups/" >&2
+    exit 2
+  fi
+fi
+
+region="${PYFORGE_BACKUP_REGION:-us-east-1}"
+bucket="${PYFORGE_BACKUP_BUCKET:-}"
+if [[ -z "${bucket}" ]]; then
+  account_id="$(aws sts get-caller-identity --region "${region}" --query Account --output text)"
+  bucket="pyforge-backups-${account_id}-${region}"
+fi
+
+working_dir="$(mktemp -d "${PYFORGE_BACKUP_TMPDIR:-/tmp}/pyforge-backup.XXXXXXXX")"
+chmod 0700 "${working_dir}"
+trap 'rm -rf "${working_dir}"' EXIT
+snapshot="${working_dir}/db.sqlite3"
+metadata="${working_dir}/db.meta"
+successful_tag_file="${PYFORGE_SUCCESSFUL_TAG_FILE:-/opt/pyforge/last-successful-image-tag}"
+
+if [[ "${mode}" == backup ]]; then
+  lock_file="${PYFORGE_DEPLOY_LOCK_FILE:-/run/lock/pyforge-deploy.lock}"
+  exec 9>"${lock_file}"
+  if ! flock --wait 7200 9; then
+    echo "Timed out waiting for the PyForge deployment/backup lock" >&2
+    exit 1
+  fi
+  database="${PYFORGE_DB_PATH:-}"
+  if [[ -z "${database}" ]]; then
+    volume_path="$(docker volume inspect pyforge_pyforge_data --format '{{.Mountpoint}}')"
+    database="${volume_path}/db.sqlite3"
+  fi
+  if [[ ! -f "${database}" ]]; then
+    echo "PyForge database is missing: ${database}" >&2
+    exit 1
+  fi
+  python3 - "${database}" "${snapshot}" <<'PY'
+import sqlite3
+import sys
+
+source = sqlite3.connect(f"file:{sys.argv[1]}?mode=ro", uri=True)
+destination = sqlite3.connect(sys.argv[2])
+try:
+    source.backup(destination)
+    result = destination.execute("PRAGMA integrity_check").fetchone()[0]
+    if result != "ok":
+        raise RuntimeError("SQLite snapshot integrity check failed")
+finally:
+    destination.close()
+    source.close()
+PY
+  if [[ ! -s "${successful_tag_file}" ]]; then
+    echo "Last successful image tag record is missing" >&2
+    exit 1
+  fi
+  image_tag="$(<"${successful_tag_file}")"
+  if [[ ! "${image_tag}" =~ ^[A-Za-z0-9_.-]+$ ]]; then
+    echo "Last successful image tag record is invalid" >&2
+    exit 1
+  fi
+  checksum="$(sha256sum "${snapshot}" | awk '{print $1}')"
+  flock -u 9
+  exec 9>&-
+  key="${PYFORGE_BACKUP_KEY:-backups/$(date -u +%Y/%m/%d/%Y%m%dT%H%M%SZ)-$(hostname)-$$.sqlite3}"
+  if [[ ! "${key}" =~ ^backups/[A-Za-z0-9._/-]+\.sqlite3$ || "${key}" == *..* || "${key}" == *//* ]]; then
+    echo "Backup key must be a SQLite snapshot path under backups/" >&2
+    exit 2
+  fi
+  aws s3 cp "${snapshot}" "s3://${bucket}/${key}" --region "${region}" --sse AES256 \
+    --metadata "sha256=${checksum},image-tag=${image_tag}" --only-show-errors
+  echo "Uploaded PyForge database snapshot: s3://${bucket}/${key}"
+else
+  aws s3 cp "s3://${bucket}/${key}" "${snapshot}" --region "${region}" --only-show-errors
+  aws s3api head-object --bucket "${bucket}" --key "${key}" --region "${region}" \
+    --query Metadata --output json > "${metadata}"
+  metadata_values="$(python3 - "${metadata}" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as source:
+    values = json.load(source)
+print(values.get("sha256", ""))
+print(values.get("image-tag", ""))
+PY
+)"
+  expected_checksum="$(printf '%s\n' "${metadata_values}" | sed -n '1p')"
+  image_tag="$(printf '%s\n' "${metadata_values}" | sed -n '2p')"
+  if [[ ! "${expected_checksum}" =~ ^[a-f0-9]{64}$ || ! "${image_tag}" =~ ^[A-Za-z0-9_.-]+$ ]]; then
+    echo "Backup metadata is invalid" >&2
+    exit 1
+  fi
+  actual_checksum="$(sha256sum "${snapshot}" | awk '{print $1}')"
+  if [[ "${actual_checksum}" != "${expected_checksum}" ]]; then
+    echo "Backup checksum mismatch" >&2
+    exit 1
+  fi
+  python3 - "${snapshot}" <<'PY'
+import sqlite3
+import sys
+
+database = sqlite3.connect(f"file:{sys.argv[1]}?mode=ro", uri=True)
+try:
+    result = database.execute("PRAGMA integrity_check").fetchone()[0]
+    if result != "ok":
+        raise RuntimeError("Restored SQLite snapshot integrity check failed")
+    database.execute("SELECT name FROM sqlite_master LIMIT 1").fetchall()
+finally:
+    database.close()
+PY
+  docker run --rm --pull=never --network none --user 0:0 \
+    --mount "type=bind,src=${snapshot},dst=/verify/db.sqlite3,readonly" \
+    -e DJANGO_DB_PATH=/verify/db.sqlite3 \
+    -e DJANGO_SECRET_KEY=backup-verification-only \
+    -e DJANGO_ALLOWED_HOSTS=localhost \
+    "ghcr.io/whistyx1/pyforge:${image_tag}" \
+    python manage.py migrate --check
+  echo "Verified isolated backup restore: s3://${bucket}/${key}"
+fi

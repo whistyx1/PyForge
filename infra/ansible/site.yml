@@ -86,6 +86,37 @@
         group: root
         mode: '0750'
 
+    - name: Install PyForge backup script
+      ansible.builtin.copy:
+        src: files/pyforge-backup
+        dest: /usr/local/bin/pyforge-backup
+        owner: root
+        group: root
+        mode: '0750'
+
+    - name: Install PyForge backup service
+      ansible.builtin.template:
+        src: templates/pyforge-backup.service.j2
+        dest: /etc/systemd/system/pyforge-backup.service
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Install PyForge backup timer
+      ansible.builtin.template:
+        src: templates/pyforge-backup.timer.j2
+        dest: /etc/systemd/system/pyforge-backup.timer
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Enable and start the PyForge backup timer
+      ansible.builtin.systemd_service:
+        name: pyforge-backup.timer
+        daemon_reload: true
+        enabled: true
+        state: started
+
     - name: Add Caddy repository
       ansible.builtin.deb822_repository:
         name: caddy
