@@ -3,6 +3,13 @@ set -euo pipefail
 
 image_tag="${1:?Usage: pyforge-deploy <image_tag>}"
 
+lock_file="${PYFORGE_DEPLOY_LOCK_FILE:-/run/lock/pyforge-deploy.lock}"
+exec 9>"${lock_file}"
+if ! flock --wait 120 9; then
+  echo "Another PyForge deployment held the lock for more than 120 seconds" >&2
+  exit 1
+fi
+
 secret_key="$(aws ssm get-parameter \
   --region us-east-1 \
   --name /pyforge/production/DJANGO_SECRET_KEY \
@@ -13,7 +20,43 @@ secret_key="$(aws ssm get-parameter \
 export PYFORGE_IMAGE_TAG="${image_tag}"
 export DJANGO_SECRET_KEY="${secret_key}"
 
-cd /opt/pyforge || exit 1
+cd "${PYFORGE_DEPLOY_DIR:-/opt/pyforge}" || exit 1
+successful_tag_file="${PYFORGE_SUCCESSFUL_TAG_FILE:-last-successful-image-tag}"
+previous_tag=""
+rollback_tag=""
+pull_started=0
+deployment_ready=0
+cleanup_rollback_image() {
+  exit_status=$?
+  trap - EXIT
+  set +e
+  if [[ "${exit_status}" -ne 0 && "${pull_started}" -eq 1 && "${deployment_ready}" -eq 0 && -n "${rollback_tag}" ]]; then
+    if ! docker image tag "ghcr.io/whistyx1/pyforge:${rollback_tag}" "ghcr.io/whistyx1/pyforge:${previous_tag}"; then
+      echo "Could not restore the previous local image tag (${previous_tag})" >&2
+    fi
+  fi
+  if [[ -n "${rollback_tag}" ]]; then
+    docker image rm "ghcr.io/whistyx1/pyforge:${rollback_tag}" >/dev/null 2>&1 || true
+  fi
+  exit "${exit_status}"
+}
+trap cleanup_rollback_image EXIT
+if [[ -f "${successful_tag_file}" ]]; then
+  previous_tag="$(<"${successful_tag_file}")"
+  if [[ -z "${previous_tag}" ]]; then
+    echo "Last successful image tag record is empty" >&2
+    exit 1
+  fi
+  if ! docker image inspect "ghcr.io/whistyx1/pyforge:${previous_tag}" >/dev/null; then
+    echo "Rollback unavailable: last successful image (${previous_tag}) is missing locally" >&2
+    exit 1
+  fi
+  rollback_tag="rollback-$$"
+  # Keep the running image even if a registry tag is updated by the pull.
+  docker image tag "ghcr.io/whistyx1/pyforge:${previous_tag}" "ghcr.io/whistyx1/pyforge:${rollback_tag}"
+fi
+
+pull_started=1
 docker compose pull
 
 image="ghcr.io/whistyx1/pyforge:${image_tag}"
@@ -23,7 +66,31 @@ if [[ "$(docker image inspect --format '{{if .Config.Healthcheck}}present{{else}
 fi
 
 if ! docker compose up -d --remove-orphans --wait --wait-timeout 60; then
+  echo "Deployment of ${image_tag} failed readiness checks" >&2
   docker compose ps web >&2 || true
-  docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{range .State.Health.Log}}{{println .Output}}{{end}}{{else}}health check unavailable{{end}}' pyforge-web-1 >&2 || true
+  docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}health check unavailable{{end}}' pyforge-web-1 >&2 || true
+  if [[ -n "${rollback_tag}" ]]; then
+    # The pull may have replaced the old tag (including a same-tag retry).
+    if ! docker image tag "ghcr.io/whistyx1/pyforge:${rollback_tag}" "ghcr.io/whistyx1/pyforge:${previous_tag}"; then
+      echo "Rollback failed: could not restore the last successful image tag (${previous_tag})" >&2
+      exit 1
+    fi
+    export PYFORGE_IMAGE_TAG="${previous_tag}"
+    if docker compose up -d --remove-orphans --pull never --wait --wait-timeout 60; then
+      echo "Rollback to the last successful image (${previous_tag}) succeeded" >&2
+    else
+      echo "Rollback to the last successful image (${previous_tag}) failed" >&2
+      docker compose ps web >&2 || true
+    fi
+  else
+    echo "Rollback unavailable: no last successful image recorded" >&2
+  fi
   exit 1
 fi
+deployment_ready=1
+
+if ! printf '%s\n' "${image_tag}" > "${successful_tag_file}.tmp" || ! mv "${successful_tag_file}.tmp" "${successful_tag_file}"; then
+  echo "Deployment became ready, but recording the last successful image failed" >&2
+  exit 1
+fi
+echo "Deployment of ${image_tag} passed readiness checks" >&2

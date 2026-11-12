@@ -10,6 +10,7 @@
           - curl
           - python3-debian
           - unzip
+          - util-linux
         state: present
         update_cache: true
 
@@ -64,6 +65,11 @@
         path: /opt/pyforge
         owner: root
         mode: '0755'
+
+    - name: Ensure the runtime lock directory exists
+      ansible.builtin.file:
+        path: /run/lock
+        state: directory
 
     - name: Create Compose for Server
       ansible.builtin.template:
