@@ -15,4 +15,6 @@ USER appuser
 WORKDIR /app/app
 ENV DJANGO_DEBUG=false DJANGO_DB_PATH=/data/db.sqlite3
 
+HEALTHCHECK --interval=5s --timeout=3s --start-period=10s --retries=5 CMD ["python", "/app/app/healthcheck.py"]
+
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "config.wsgi:application"]

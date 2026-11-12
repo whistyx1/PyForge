@@ -15,4 +15,15 @@ export DJANGO_SECRET_KEY="${secret_key}"
 
 cd /opt/pyforge || exit 1
 docker compose pull
-docker compose up -d --remove-orphans
+
+image="ghcr.io/whistyx1/pyforge:${image_tag}"
+if [[ "$(docker image inspect --format '{{if .Config.Healthcheck}}present{{else}}missing{{end}}' "${image}")" != present ]]; then
+  echo "Deployment image has no health check" >&2
+  exit 1
+fi
+
+if ! docker compose up -d --remove-orphans --wait --wait-timeout 60; then
+  docker compose ps web >&2 || true
+  docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{range .State.Health.Log}}{{println .Output}}{{end}}{{else}}health check unavailable{{end}}' pyforge-web-1 >&2 || true
+  exit 1
+fi

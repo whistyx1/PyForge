@@ -43,8 +43,10 @@ This log records work completed in the repository. The product roadmap remains i
 - Added narrowly scoped Parameter Store access for the DuckDNS token. GitHub Actions stores the repository secret as a SecureString; the EC2 updater reads it from Parameter Store and the token is not kept in the repository.
 - Replaced Certbot's IP-certificate timer with a systemd DuckDNS updater timer that runs on boot and every five minutes. The previous Certbot renewal timer is disabled.
 - Verification: GitHub Actions test, publish, and deploy jobs passed; Ansible completed with no failures; `https://pyforge.duckdns.org` returned HTTP 200 and HTTP redirected to HTTPS; the DuckDNS timer is active. Terraform formatting and validation, Ansible syntax, shell syntax, and `git diff --check` passed.
+- Added a Django readiness endpoint, a container health probe, and a bounded deployment wait. Verification: 9 Django tests, 5 Node tests, shell/Python syntax, and whitespace checks passed. The local image built successfully; Docker reported healthy with production-style allowed hosts and unhealthy when the probe host was excluded. Live rollout remains pending.
 
 ## Next step
 
+- Verify the new container readiness check locally and review its behavior before a live rollout.
 - Walk through the Terraform, Ansible, Docker, Caddy, DuckDNS, and GitHub Actions configuration line by line, as requested.
 - Connect project intake to backend validation and analysis, then build the review flow described in the product plan.
