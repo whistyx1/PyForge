@@ -67,8 +67,11 @@ data "aws_iam_policy_document" "github_deploy_permissions" {
   }
 
   statement {
-    actions   = ["ssm:PutParameter"]
-    resources = ["arn:aws:ssm:us-east-1:266294231268:parameter/pyforge/production/DJANGO_SECRET_KEY"]
+    actions = ["ssm:PutParameter"]
+    resources = [
+      "arn:aws:ssm:us-east-1:266294231268:parameter/pyforge/production/DJANGO_SECRET_KEY",
+      "arn:aws:ssm:us-east-1:266294231268:parameter/pyforge/production/DUCKDNS_TOKEN",
+    ]
   }
 }
 
@@ -79,8 +82,11 @@ resource "aws_iam_role_policy" "github_deploy" {
 
 data "aws_iam_policy_document" "server_secret_read" {
   statement {
-    actions   = ["ssm:GetParameter"]
-    resources = ["arn:aws:ssm:us-east-1:266294231268:parameter/pyforge/production/DJANGO_SECRET_KEY"]
+    actions = ["ssm:GetParameter"]
+    resources = [
+      "arn:aws:ssm:us-east-1:266294231268:parameter/pyforge/production/DJANGO_SECRET_KEY",
+      "arn:aws:ssm:us-east-1:266294231268:parameter/pyforge/production/DUCKDNS_TOKEN",
+    ]
   }
 }
 

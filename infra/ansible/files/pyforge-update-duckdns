@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+subdomain="${1:?Usage: pyforge-update-duckdns <duckdns-subdomain>}"
+
+metadata_token="$(curl --fail --silent --show-error --max-time 5 \
+  --request PUT \
+  --header 'X-aws-ec2-metadata-token-ttl-seconds: 21600' \
+  http://169.254.169.254/latest/api/token)"
+
+public_ip="$(curl --fail --silent --show-error --max-time 5 \
+  --header "X-aws-ec2-metadata-token: ${metadata_token}" \
+  http://169.254.169.254/latest/meta-data/public-ipv4)"
+
+duckdns_token="$(aws ssm get-parameter \
+  --region us-east-1 \
+  --name /pyforge/production/DUCKDNS_TOKEN \
+  --with-decryption \
+  --query 'Parameter.Value' \
+  --output text)"
+
+response="$(curl --config - <<EOF
+url = "https://www.duckdns.org/update?domains=${subdomain}&token=${duckdns_token}&ip=${public_ip}"
+silent
+show-error
+fail
+max-time = 15
+EOF
+)"
+
+if [[ "${response}" != "OK" ]]; then
+  echo "DuckDNS did not accept the IP update" >&2
+  exit 1
+fi
+
+printf 'DuckDNS updated for %s to %s\n' "${subdomain}.duckdns.org" "${public_ip}"

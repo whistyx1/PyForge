@@ -69,10 +69,19 @@ jobs:
             - name: Copy GitHub secret to Parameter Store
               env:
                 DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+                DUCKDNS_TOKEN: ${{ secrets.DUCKDNS_TOKEN }}
               run: |
+                test -n "$DUCKDNS_TOKEN"
                 aws ssm put-parameter \
                     --name /pyforge/production/DJANGO_SECRET_KEY \
                     --value "${DJANGO_SECRET_KEY}" \
+                    --type SecureString \
+                    --overwrite \
+                    --region us-east-1
+
+                aws ssm put-parameter \
+                    --name /pyforge/production/DUCKDNS_TOKEN \
+                    --value "$DUCKDNS_TOKEN" \
                     --type SecureString \
                     --overwrite \
                     --region us-east-1

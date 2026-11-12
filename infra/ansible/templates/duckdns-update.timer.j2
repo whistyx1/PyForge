@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh the PyForge DuckDNS record periodically
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=5min
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target
