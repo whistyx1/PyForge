@@ -1,11 +1,13 @@
-"""Readiness behavior without a database or a real network connection."""
+"""Readiness behavior with isolated SQLite files and no network connection."""
 
 import runpy
+import sqlite3
+import tempfile
 from io import BytesIO
 from pathlib import Path
 from unittest.mock import patch
 
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, override_settings
 
 from healthcheck import HEALTH_URL, is_ready
 
@@ -20,12 +22,61 @@ def response_with(status, body):
 
 
 class HealthEndpointTests(SimpleTestCase):
-    def test_health_returns_expected_json_without_database_access(self):
-        response = self.client.get('/health/')
+    def test_health_returns_exact_json_when_database_is_readable(self):
+        with tempfile.TemporaryDirectory() as folder:
+            database = Path(folder) / 'db.sqlite3'
+            connection = sqlite3.connect(database)
+            connection.execute('CREATE TABLE django_migrations (id INTEGER PRIMARY KEY, app TEXT, name TEXT, applied TEXT)')
+            connection.execute("INSERT INTO django_migrations (app, name, applied) VALUES ('landing', '0001_initial', '2026-11-12')")
+            connection.commit()
+            connection.close()
+            with override_settings(DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': database}}):
+                response = self.client.get('/health/')
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/json')
         self.assertEqual(response.json(), {'status': 'ok'})
+
+    def test_health_returns_503_without_creating_missing_database(self):
+        with tempfile.TemporaryDirectory() as folder:
+            database = Path(folder) / 'missing.sqlite3'
+            with override_settings(DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': database}}):
+                response = self.client.get('/health/')
+            self.assertFalse(database.exists())
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json(), {'status': 'unavailable'})
+
+    def test_health_returns_503_for_existing_unmigrated_database(self):
+        with tempfile.TemporaryDirectory() as folder:
+            database = Path(folder) / 'db.sqlite3'
+            connection = sqlite3.connect(database)
+            connection.execute('CREATE TABLE unrelated (id INTEGER)')
+            connection.close()
+            with override_settings(DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': database}}):
+                response = self.client.get('/health/')
+            self.assertTrue(database.is_file())
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json(), {'status': 'unavailable'})
+
+    @patch('config.health.sqlite3.connect', side_effect=sqlite3.OperationalError('unavailable'))
+    def test_health_returns_503_when_database_cannot_be_opened(self, connect):
+        with tempfile.TemporaryDirectory() as folder:
+            database = Path(folder) / 'db.sqlite3'
+            database.touch()
+            with override_settings(DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': database}}):
+                response = self.client.get('/health/')
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json(), {'status': 'unavailable'})
+        connect.assert_called_once()
+
+    def test_health_allows_get_only(self):
+        response = self.client.post('/health/')
+
+        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response['Allow'], 'GET')
 
 
 class ContainerProbeTests(SimpleTestCase):

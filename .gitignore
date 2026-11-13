@@ -1,4 +1,5 @@
 AGENTS.md
+/tasks/
 
 #Ignore Python cache files
 __pycache__
