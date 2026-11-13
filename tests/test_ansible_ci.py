@@ -39,6 +39,7 @@ class AnsiblePipelineTests(unittest.TestCase):
         self.assertLess(configure, deploy)
         configure_step = workflow[configure:workflow.index("- name: Copy GitHub secret", configure)]
         self.assertIn("ansible-playbook", configure_step)
+        self.assertIn("-e ansible_remote_tmp=/tmp/pyforge-ansible", configure_step)
         self.assertNotIn("continue-on-error: true", configure_step)
         self.assertNotIn("|| true", configure_step)
         self.assertIn("if: steps.server_config.outputs.configure == 'true'", configure_step)
