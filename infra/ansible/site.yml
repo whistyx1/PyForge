@@ -94,6 +94,14 @@
         group: root
         mode: '0750'
 
+    - name: Install PyForge restore script
+      ansible.builtin.copy:
+        src: files/pyforge-restore
+        dest: /usr/local/bin/pyforge-restore
+        owner: root
+        group: root
+        mode: '0750'
+
     - name: Install PyForge backup service
       ansible.builtin.template:
         src: templates/pyforge-backup.service.j2

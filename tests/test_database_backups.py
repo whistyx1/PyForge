@@ -22,7 +22,7 @@ import time
 if sys.argv[1:] == ['-u', '9']:
     fcntl.flock(9, fcntl.LOCK_UN)
     sys.exit(0)
-if sys.argv[1:] != ['--wait', '7200', '9']:
+if sys.argv[1:] not in (['--wait', '7200', '9'], ['--wait', '120', '9']):
     sys.exit(2)
 while True:
     try:
@@ -78,10 +78,22 @@ with events.open('a') as log:
 """.format(python=sys.executable)
 DOCKER = """#!/bin/bash
 printf 'docker:%s\\n' "$*" >> "$TEST_EVENTS"
+if [[ "$1 $2" == 'image inspect' ]]; then
+    if [[ "$*" == *'--format'* ]]; then
+        printf 'ghcr.io/whistyx1/pyforge@sha256:%064d\\n' 1
+    elif [[ "$TEST_IMAGE_MISSING" == 1 ]]; then
+        exit 1
+    fi
+    exit 0
+fi
+if [[ "$1" == pull ]]; then
+    [[ "$TEST_PULL_FAIL" == 1 ]] && exit 8
+    exit 0
+fi
 if [[ "$1" == run ]]; then
     [[ "$*" == *'--pull=never --network none --user 0:0'* ]] || exit 2
     [[ "$*" == *'readonly'* ]] || exit 3
-    [[ "$*" == *'ghcr.io/whistyx1/pyforge:ready-tag'* ]] || exit 4
+    [[ "$*" == *"$TEST_EXPECTED_IMAGE"* ]] || exit 4
     [[ "$*" == *'python manage.py migrate --check'* ]] || exit 5
     [[ "$TEST_DOCKER_FAIL" == 1 ]] && exit 6
 fi
@@ -136,7 +148,12 @@ class DatabaseBackupTests(unittest.TestCase):
             "TEST_AWS_FAIL": "1" if flags.get("aws_fail") else "0",
             "TEST_AWS_HOLD": "1" if flags.get("aws_hold") else "0",
             "TEST_DOCKER_FAIL": "1" if flags.get("docker_fail") else "0",
+            "TEST_IMAGE_MISSING": "1" if flags.get("image_missing") else "0",
+            "TEST_PULL_FAIL": "1" if flags.get("pull_fail") else "0",
+            "TEST_EXPECTED_IMAGE": flags.get("expected_image", "ghcr.io/whistyx1/pyforge@sha256:" + "0" * 63 + "1"),
         })
+        if flags.get("local_snapshot"):
+            env["PYFORGE_VERIFY_LOCAL_SNAPSHOT"] = str(flags["local_snapshot"])
         process = subprocess.Popen(["bash", str(SCRIPT), *args], env=env,
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         self.addCleanup(self._stop, process)
@@ -171,11 +188,46 @@ class DatabaseBackupTests(unittest.TestCase):
         self.assertEqual(metadata, {
             "sha256": hashlib.sha256(obj.read_bytes()).hexdigest(),
             "image-tag": "ready-tag",
+            "image-digest": "sha256:" + "0" * 63 + "1",
         })
         self.assertFalse(Path(str(obj) + ".meta").exists())
         self.assertIn("Uploaded PyForge database snapshot", output)
         self.assertEqual(sum(line.startswith("aws-end:") for line in self.events.read_text().splitlines()), 1)
         self._assert_clean()
+
+    def test_verify_pulls_missing_digest_image_before_isolated_check(self):
+        self.assertEqual(self._run("backup")[0], 0)
+        code, output = self._run("verify", KEY, image_missing=True)
+        self.assertEqual(code, 0, output)
+        events = self.events.read_text()
+        self.assertIn("docker:pull ghcr.io/whistyx1/pyforge@sha256:", events)
+        self.assertIn("--network none", events)
+
+    def test_verify_uses_supplied_local_snapshot_for_image_check(self):
+        self.assertEqual(self._run("backup")[0], 0)
+        local = self.root / "selected.sqlite3"
+        shutil.copyfile(self._object(), local)
+        self._object().write_bytes(b"different object")
+        self.events.unlink()
+        code, output = self._run("verify", KEY, local_snapshot=local)
+        self.assertEqual(code, 0, output)
+        self.assertFalse(any(line.startswith("aws-start:s3://") for line in self.events.read_text().splitlines()))
+
+    def test_verify_fails_when_digest_image_pull_fails(self):
+        self.assertEqual(self._run("backup")[0], 0)
+        code, output = self._run("verify", KEY, image_missing=True, pull_fail=True)
+        self.assertNotEqual(code, 0)
+        self.assertNotIn("Verified isolated", output)
+
+    def test_verify_legacy_backup_warns_and_uses_tag(self):
+        self.assertEqual(self._run("backup")[0], 0)
+        metadata_path = self.metadata / "test-bucket" / KEY
+        values = json.loads(metadata_path.read_text())
+        values.pop("image-digest")
+        metadata_path.write_text(json.dumps(values))
+        code, output = self._run("verify", KEY, expected_image="ghcr.io/whistyx1/pyforge:ready-tag")
+        self.assertEqual(code, 0, output)
+        self.assertIn("legacy backup has no image digest", output)
 
     def test_invalid_database_and_failed_upload_never_report_success(self):
         self.db.write_bytes(b"invalid sqlite")
@@ -291,3 +343,88 @@ class DatabaseBackupTests(unittest.TestCase):
         self.assertIn("name: pyforge-backup.timer", site)
         self.assertIn("db.sqlite3-wal", runbook)
         self.assertIn("db.sqlite3-shm", runbook)
+
+    def test_restore_refuses_existing_database_before_backup_access(self):
+        target = self.root / "target"
+        target.mkdir()
+        (target / "db.sqlite3").write_text("keep")
+        env = os.environ.copy()
+        env.update({"PATH": f'{self.bin}{os.pathsep}{env["PATH"]}',
+                    "PYFORGE_RESTORE_VOLUME_PATH": str(target),
+                    "PYFORGE_DEPLOY_LOCK_FILE": str(self.root / "restore.lock"),
+                    "PYFORGE_BACKUP_BUCKET": "test-bucket"})
+        result = subprocess.run(["bash", str(ROOT / "infra/ansible/files/pyforge-restore"), KEY],
+                                env=env, capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("target database or SQLite sidecar already exists", result.stderr)
+        self.assertEqual((target / "db.sqlite3").read_text(), "keep")
+        self.assertFalse(self.events.exists())
+
+    def test_restore_rejects_invalid_backup_key_without_touching_target(self):
+        target = self.root / "empty"
+        target.mkdir()
+        env = os.environ.copy()
+        env.update({"PATH": f'{self.bin}{os.pathsep}{env["PATH"]}',
+                    "PYFORGE_RESTORE_VOLUME_PATH": str(target),
+                    "PYFORGE_BACKUP_BUCKET": "test-bucket"})
+        result = subprocess.run(["bash", str(ROOT / "infra/ansible/files/pyforge-restore"), "../bad.sqlite3"],
+                                env=env, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(list(target.iterdir()), [])
+
+    def _restore(self, *, verification_fails=False, corrupt_checksum=False):
+        target = self.root / "restore-target"
+        target.mkdir(exist_ok=True)
+        self._command("pyforge-backup", "#!/bin/bash\n[[ \"$1\" == verify ]] || exit 2\n[[ -f \"$PYFORGE_VERIFY_LOCAL_SNAPSHOT\" ]] || exit 3\nsha256sum \"$PYFORGE_VERIFY_LOCAL_SNAPSHOT\" | awk '{print \"verified-sha256:\" $1}' >> \"$TEST_EVENTS\"\n[[ \"$TEST_VERIFY_FAIL\" == 1 ]] && exit 9\nexit 0\n")
+        self._command("chown", "#!/bin/bash\nexit 0\n")
+        self._command("docker", "#!/bin/bash\nexit 1\n")
+        self._command("flock", FLOCK.format(python=sys.executable))
+        env = os.environ.copy()
+        env.update({
+            "PATH": f'{self.bin}{os.pathsep}{env["PATH"]}',
+            "PYFORGE_RESTORE_VOLUME_PATH": str(target),
+            "PYFORGE_RESTORE_TMPDIR": str(self.tmp),
+            "PYFORGE_DEPLOY_LOCK_FILE": str(self.root / "restore.lock"),
+            "PYFORGE_BACKUP_BUCKET": "test-bucket",
+            "TEST_S3": str(self.s3),
+            "TEST_METADATA": str(self.metadata),
+            "TEST_EVENTS": str(self.events),
+            "TEST_VERIFY_FAIL": "1" if verification_fails else "0",
+        })
+        if corrupt_checksum:
+            obj = self._object()
+            obj.write_bytes(obj.read_bytes() + b"changed")
+        result = subprocess.run(["bash", str(ROOT / "infra/ansible/files/pyforge-restore"), KEY],
+                                env=env, capture_output=True, text=True)
+        return target, result
+
+    def test_restore_installs_verified_database_into_empty_volume(self):
+        self.assertEqual(self._run("backup")[0], 0)
+        target, result = self._restore()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        with sqlite3.connect(target / "db.sqlite3") as connection:
+            self.assertEqual(connection.execute("SELECT value FROM sample").fetchone(), ("committed",))
+        self.assertEqual(list(target.glob(".pyforge-restore.*")), [])
+
+    def test_restore_installs_the_same_snapshot_passed_to_image_verification(self):
+        self.assertEqual(self._run("backup")[0], 0)
+        target, result = self._restore()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        events = self.events.read_text().splitlines()
+        verified = [line.split(":", 1)[1] for line in events if line.startswith("verified-sha256:")]
+        self.assertEqual(verified, [hashlib.sha256((target / "db.sqlite3").read_bytes()).hexdigest()])
+        downloads = [line for line in events if line.startswith("aws-start:s3://")]
+        self.assertEqual(len(downloads), 1)
+
+    def test_restore_checksum_failure_leaves_empty_volume(self):
+        self.assertEqual(self._run("backup")[0], 0)
+        target, result = self._restore(corrupt_checksum=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("checksum is invalid", result.stderr)
+        self.assertEqual(list(target.iterdir()), [])
+
+    def test_restore_image_verification_failure_leaves_empty_volume(self):
+        self.assertEqual(self._run("backup")[0], 0)
+        target, result = self._restore(verification_fails=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(list(target.iterdir()), [])

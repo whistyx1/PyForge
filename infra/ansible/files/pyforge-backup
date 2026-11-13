@@ -78,6 +78,13 @@ PY
     echo "Last successful image tag record is invalid" >&2
     exit 1
   fi
+  image="ghcr.io/whistyx1/pyforge:${image_tag}"
+  image_digest="$(docker image inspect --format '{{index .RepoDigests 0}}' "${image}" 2>/dev/null || true)"
+  if [[ ! "${image_digest}" =~ ^ghcr\.io/whistyx1/pyforge@sha256:[a-f0-9]{64}$ ]]; then
+    echo "Could not resolve a valid GHCR image digest for ${image_tag}" >&2
+    exit 1
+  fi
+  image_digest="${image_digest##*@}"
   checksum="$(sha256sum "${snapshot}" | awk '{print $1}')"
   flock -u 9
   exec 9>&-
@@ -87,10 +94,18 @@ PY
     exit 2
   fi
   aws s3 cp "${snapshot}" "s3://${bucket}/${key}" --region "${region}" --sse AES256 \
-    --metadata "sha256=${checksum},image-tag=${image_tag}" --only-show-errors
+    --metadata "sha256=${checksum},image-tag=${image_tag},image-digest=${image_digest}" --only-show-errors
   echo "Uploaded PyForge database snapshot: s3://${bucket}/${key}"
 else
-  aws s3 cp "s3://${bucket}/${key}" "${snapshot}" --region "${region}" --only-show-errors
+  if [[ -n "${PYFORGE_VERIFY_LOCAL_SNAPSHOT:-}" ]]; then
+    if [[ ! -f "${PYFORGE_VERIFY_LOCAL_SNAPSHOT}" || -L "${PYFORGE_VERIFY_LOCAL_SNAPSHOT}" ]]; then
+      echo "Local backup snapshot is missing or invalid" >&2
+      exit 1
+    fi
+    cp "${PYFORGE_VERIFY_LOCAL_SNAPSHOT}" "${snapshot}"
+  else
+    aws s3 cp "s3://${bucket}/${key}" "${snapshot}" --region "${region}" --only-show-errors
+  fi
   aws s3api head-object --bucket "${bucket}" --key "${key}" --region "${region}" \
     --query Metadata --output json > "${metadata}"
   metadata_values="$(python3 - "${metadata}" <<'PY'
@@ -101,10 +116,12 @@ with open(sys.argv[1], encoding="utf-8") as source:
     values = json.load(source)
 print(values.get("sha256", ""))
 print(values.get("image-tag", ""))
+print(values.get("image-digest", ""))
 PY
 )"
   expected_checksum="$(printf '%s\n' "${metadata_values}" | sed -n '1p')"
   image_tag="$(printf '%s\n' "${metadata_values}" | sed -n '2p')"
+  image_digest="$(printf '%s\n' "${metadata_values}" | sed -n '3p')"
   if [[ ! "${expected_checksum}" =~ ^[a-f0-9]{64}$ || ! "${image_tag}" =~ ^[A-Za-z0-9_.-]+$ ]]; then
     echo "Backup metadata is invalid" >&2
     exit 1
@@ -127,12 +144,25 @@ try:
 finally:
     database.close()
 PY
+  if [[ -n "${image_digest}" ]]; then
+    if [[ ! "${image_digest}" =~ ^sha256:[a-f0-9]{64}$ ]]; then
+      echo "Backup image digest is invalid" >&2
+      exit 1
+    fi
+    verification_image="ghcr.io/whistyx1/pyforge@${image_digest}"
+    if ! docker image inspect "${verification_image}" >/dev/null 2>&1; then
+      docker pull "${verification_image}"
+    fi
+  else
+    echo "Warning: legacy backup has no image digest; using mutable tag ${image_tag}. Exact image contents cannot be confirmed." >&2
+    verification_image="ghcr.io/whistyx1/pyforge:${image_tag}"
+  fi
   docker run --rm --pull=never --network none --user 0:0 \
     --mount "type=bind,src=${snapshot},dst=/verify/db.sqlite3,readonly" \
     -e DJANGO_DB_PATH=/verify/db.sqlite3 \
     -e DJANGO_SECRET_KEY=backup-verification-only \
     -e DJANGO_ALLOWED_HOSTS=localhost \
-    "ghcr.io/whistyx1/pyforge:${image_tag}" \
+    "${verification_image}" \
     python manage.py migrate --check
   echo "Verified isolated backup restore: s3://${bucket}/${key}"
 fi

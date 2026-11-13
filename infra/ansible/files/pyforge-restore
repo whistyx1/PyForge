@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+set -euo pipefail
+umask 077
+
+if [[ $# -ne 1 || ! "$1" =~ ^backups/[A-Za-z0-9._/-]+\.sqlite3$ || "$1" == *..* || "$1" == *//* ]]; then
+  echo "Usage: pyforge-restore backups/YYYY/MM/DD/backup.sqlite3" >&2
+  exit 2
+fi
+key="$1"
+lock_file="${PYFORGE_DEPLOY_LOCK_FILE:-/run/lock/pyforge-deploy.lock}"
+exec 9>"$lock_file"
+if ! flock --wait 120 9; then
+  echo "Restore refused: deployment or backup holds the database lock" >&2
+  exit 1
+fi
+if [[ "$(docker inspect --format '{{.State.Running}}' pyforge-web-1 2>/dev/null || true)" == true ]]; then
+  echo "Restore refused: web container is running" >&2
+  exit 1
+fi
+if [[ -n "${PYFORGE_RESTORE_VOLUME_PATH:-}" ]]; then
+  volume_path="$PYFORGE_RESTORE_VOLUME_PATH"
+else
+  docker volume create pyforge_pyforge_data >/dev/null
+  volume_path="$(docker volume inspect pyforge_pyforge_data --format '{{.Mountpoint}}')"
+fi
+database="${volume_path}/db.sqlite3"
+if [[ -e "$database" || -e "${database}-wal" || -e "${database}-shm" ]]; then
+  echo "Restore refused: target database or SQLite sidecar already exists: ${database}" >&2
+  exit 1
+fi
+region="${PYFORGE_BACKUP_REGION:-us-east-1}"
+bucket="${PYFORGE_BACKUP_BUCKET:-}"
+if [[ -z "$bucket" ]]; then
+  account_id="$(aws sts get-caller-identity --region "$region" --query Account --output text)"
+  bucket="pyforge-backups-${account_id}-${region}"
+fi
+tmp_dir="$(mktemp -d "${PYFORGE_RESTORE_TMPDIR:-/tmp}/pyforge-restore.XXXXXXXX")"
+chmod 0700 "$tmp_dir"
+tmp="${tmp_dir}/db.sqlite3"
+meta="${tmp_dir}/meta.json"
+trap 'rm -rf "$tmp_dir"' EXIT
+aws s3 cp "s3://${bucket}/${key}" "$tmp" --region "$region" --only-show-errors
+PYFORGE_VERIFY_LOCAL_SNAPSHOT="$tmp" pyforge-backup verify "$key"
+aws s3api head-object --bucket "$bucket" --key "$key" --region "$region" --query Metadata --output json > "$meta"
+expected="$(python3 - "$meta" <<'PY'
+import json, sys
+print(json.load(open(sys.argv[1], encoding="utf-8")).get("sha256", ""))
+PY
+)"
+if [[ ! "$expected" =~ ^[a-f0-9]{64}$ ]] || [[ "$(sha256sum "$tmp" | awk '{print $1}')" != "$expected" ]]; then
+  echo "Restore refused: downloaded backup checksum is invalid" >&2
+  exit 1
+fi
+python3 - "$tmp" <<'PY'
+import sqlite3, sys
+db = sqlite3.connect(f"file:{sys.argv[1]}?mode=ro", uri=True)
+try:
+    if db.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
+        raise SystemExit("Restore refused: downloaded backup failed SQLite integrity check")
+finally:
+    db.close()
+PY
+mkdir -p "$volume_path"
+if [[ -e "$database" || -e "${database}-wal" || -e "${database}-shm" ]]; then
+  echo "Restore refused: target database appeared during verification" >&2
+  exit 1
+fi
+stage="$(mktemp "${volume_path}/.pyforge-restore.XXXXXXXX")"
+trap 'rm -rf "$tmp_dir"; rm -f "$stage"' EXIT
+cp "$tmp" "$stage"
+chown 1000:1000 "$stage"
+chmod 0600 "$stage"
+# Hard-link creation fails if the target appeared during verification or staging.
+ln "$stage" "$database"
+echo "Restored verified backup to empty PyForge volume: ${database}"
