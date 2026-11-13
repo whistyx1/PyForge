@@ -1,7 +1,7 @@
 {% extends 'landing/base.html' %}
 {% load static %}
 
-{% block title %}Try PyForge | PyForge{% endblock %}
+{% block title %}Setup Demo | PyForge{% endblock %}
 
 {% block content %}
 <main class="deployment_setup">
@@ -9,10 +9,10 @@
         <a href="{% url 'home' %}" class="deployment_setup_back">← Back to PyForge</a>
 
         <header class="deployment_setup_header">
-            <p class="deployment_setup_eyebrow">START A DEPLOYMENT</p>
-            <h1 class="deployment_setup_title">Connect your project and server.</h1>
+            <p class="deployment_setup_eyebrow">INTERACTIVE SETUP DEMO</p>
+            <h1 class="deployment_setup_title">Explore project and server setup.</h1>
             <p class="deployment_setup_intro">
-                Choose a project source and tell PyForge where you want to deploy. You’ll review the detected settings and deployment plan before anything runs.
+                This is a browser-only prototype. Choosing a folder or entering server details does not upload your project, analyze it, connect to your server, or deploy anything.
             </p>
         </header>
 
@@ -65,7 +65,7 @@
                         <span class="deployment_setup_step">02</span>
                         <div>
                             <h2 id="server-target-title">Server target</h2>
-                            <p>Connect to a Linux server you control.</p>
+                            <p>Preview the details you would use for a Linux server you control.</p>
                         </div>
                     </div>
 
@@ -127,14 +127,14 @@
 
                 <div class="deployment_setup_actions">
                     <button class="button button--primary" type="button" disabled>Review deployment plan</button>
-                    <p>Next, PyForge will detect the framework and ask you to confirm the app settings.</p>
+                    <p>Plan review is not available yet. Project analysis and deployment are planned for later stages.</p>
                 </div>
             </div>
 
             <aside class="deployment_setup_preview">
                 <div class="deployment_preview-heading">
-                    <p class="deployment_setup_eyebrow">YOUR FLOW</p>
-                    <h2>Review first. Deploy when you’re ready.</h2>
+                    <p class="deployment_setup_eyebrow">PLANNED FLOW</p>
+                    <h2>Planned workflow: review before deployment.</h2>
                 </div>
                 <ol class="deployment_preview-steps">
                     <li><span>1</span><div><strong>Analyze</strong><small>Detect framework and app settings</small></div></li>
@@ -142,7 +142,7 @@
                     <li><span>3</span><div><strong>Approve & deploy</strong><small>Connect over SSH and monitor logs</small></div></li>
                 </ol>
                 <img src="{% static 'landing/assets/terminal-preview.png' %}" alt="Example preview of deployment output in a terminal" class="deployment_terminal-preview">
-                <p class="deployment_preview-caption">The deployment view will show progress, logs, and health checks.</p>
+                <p class="deployment_preview-caption">A future deployment view will show progress, logs, and health checks.</p>
             </aside>
         </div>
     </div>
