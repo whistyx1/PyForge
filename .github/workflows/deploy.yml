@@ -4,6 +4,7 @@ on:
     push:
         branches:
             - main
+    workflow_dispatch:
     pull_request:
         branches:
             - main
@@ -29,7 +30,7 @@ jobs:
     publish:
         runs-on: ubuntu-latest
         needs: test
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
         permissions:
             contents: read
             packages: write
@@ -54,7 +55,7 @@ jobs:
     deploy:
         runs-on: ubuntu-latest
         timeout-minutes: 75
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
         needs: publish
         concurrency:
             group: pyforge-production-deploy
@@ -64,6 +65,8 @@ jobs:
             id-token: write
         steps:
             - uses: actions/checkout@v7
+              with:
+                  fetch-depth: 0
             - name: Check whether this commit is still main
               id: current
               env:
@@ -84,6 +87,41 @@ jobs:
               with:
                 role-to-assume: arn:aws:iam::266294231268:role/pyforge-github-deploy
                 aws-region: us-east-1
+
+            - name: Detect server configuration changes
+              id: server_config
+              if: steps.current.outputs.deploy == 'true'
+              env:
+                PUSH_BEFORE: ${{ github.event.before }}
+              run: |
+                set -euo pipefail
+                if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then
+                    configure="$(python infra/ansible/should_configure.py workflow_dispatch </dev/null)"
+                else
+                    changed="$(git diff --name-only "$PUSH_BEFORE" "$GITHUB_SHA")"
+                    configure="$(printf '%s\n' "$changed" | python infra/ansible/should_configure.py push)"
+                fi
+                echo "configure=$configure" >> "$GITHUB_OUTPUT"
+
+            - name: Install Ansible SSM dependencies
+              if: steps.server_config.outputs.configure == 'true'
+              run: |
+                python -m pip install ansible boto3 botocore
+                ansible-galaxy collection install amazon.aws
+                curl -fsSL https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb -o /tmp/session-manager-plugin.deb
+                sudo dpkg -i /tmp/session-manager-plugin.deb
+
+            - name: Configure server with Ansible
+              if: steps.server_config.outputs.configure == 'true'
+              env:
+                ANSIBLE_AWS_SSM_BUCKET_NAME: pyforge-backups-266294231268-us-east-1
+              run: |
+                ansible-inventory -i infra/ansible/inventory.aws_ssm.yml --list | python -c 'import json,sys; hosts=json.load(sys.stdin).get("pyforge",{}).get("hosts",[]); assert len(hosts)==1, "Expected exactly one PyForge server"'
+                ansible-playbook -i infra/ansible/inventory.aws_ssm.yml infra/ansible/site.yml \
+                    -e ansible_connection=amazon.aws.aws_ssm \
+                    -e ansible_python_interpreter=/usr/bin/python3 \
+                    -e ansible_aws_ssm_bucket_name="$ANSIBLE_AWS_SSM_BUCKET_NAME" \
+                    -e ansible_aws_ssm_region=us-east-1
 
             - name: Copy GitHub secret to Parameter Store
               if: steps.current.outputs.deploy == 'true'

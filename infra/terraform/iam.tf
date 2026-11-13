@@ -57,6 +57,29 @@ resource "aws_iam_role" "github_deploy" {
 
 data "aws_iam_policy_document" "github_deploy_permissions" {
   statement {
+    actions = ["ssm:StartSession"]
+    resources = [
+      aws_instance.server.arn,
+      "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:document/SSM-SessionManagerRunShell",
+    ]
+  }
+
+  statement {
+    actions   = ["ssm:TerminateSession", "ssm:ResumeSession", "ssmmessages:OpenDataChannel"]
+    resources = ["arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:session/*"]
+  }
+
+  statement {
+    actions   = ["ssm:GetConnectionStatus"]
+    resources = [aws_instance.server.arn]
+  }
+
+  statement {
+    actions   = ["ssm:DescribeSessions"]
+    resources = ["*"]
+  }
+
+  statement {
     actions   = ["ssm:SendCommand"]
     resources = [aws_instance.server.arn, "arn:aws:ssm:us-east-1::document/AWS-RunShellScript"]
   }

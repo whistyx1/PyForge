@@ -44,6 +44,32 @@ resource "aws_s3_bucket_lifecycle_configuration" "backups" {
       days = 14
     }
   }
+  rule {
+    id     = "expire-ansible-ssm-transfers-after-one-day"
+    status = "Enabled"
+    filter {
+      prefix = "i-"
+    }
+    expiration {
+      days = 1
+    }
+  }
+}
+
+data "aws_iam_policy_document" "github_ansible_transfer" {
+  statement {
+    actions   = ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"]
+    resources = ["${aws_s3_bucket.backups.arn}/i-*/*"]
+  }
+  statement {
+    actions   = ["s3:ListBucket", "s3:GetBucketLocation"]
+    resources = [aws_s3_bucket.backups.arn]
+  }
+}
+
+resource "aws_iam_role_policy" "github_ansible_transfer" {
+  role   = aws_iam_role.github_deploy.id
+  policy = data.aws_iam_policy_document.github_ansible_transfer.json
 }
 
 data "aws_iam_policy_document" "backups_tls_only" {

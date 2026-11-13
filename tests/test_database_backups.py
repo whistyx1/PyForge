@@ -330,7 +330,8 @@ class DatabaseBackupTests(unittest.TestCase):
                       "restrict_public_buckets = true", 'sse_algorithm = "AES256"',
                       "days = 14", '"s3:PutObject"', '"s3:GetObject"', '"s3:ListBucket"'):
             self.assertIn(token, terraform)
-        self.assertNotIn('"s3:DeleteObject"', terraform)
+        server_backup_policy = terraform.split('data "aws_iam_policy_document" "server_backup_access"', 1)[1]
+        self.assertNotIn('"s3:DeleteObject"', server_backup_policy)
         timer = (ROOT / "infra/ansible/templates/pyforge-backup.timer.j2").read_text()
         service = (ROOT / "infra/ansible/templates/pyforge-backup.service.j2").read_text()
         site = (ROOT / "infra/ansible/site.yml").read_text()
