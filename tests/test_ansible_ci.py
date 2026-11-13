@@ -45,7 +45,9 @@ class AnsiblePipelineTests(unittest.TestCase):
         self.assertIn("needs: publish", workflow)
 
     def test_ssm_inventory_and_transfer_policy_are_separate_from_backups(self):
-        inventory = (ROOT / "infra/ansible/inventory.aws_ssm.yml").read_text()
+        inventory_path = ROOT / "infra/ansible/inventory.ssm.aws_ec2.yml"
+        self.assertTrue(inventory_path.name.endswith("aws_ec2.yml"))
+        inventory = inventory_path.read_text()
         policy = (ROOT / "infra/terraform/backups.tf").read_text()
         self.assertIn("- instance-id", inventory)
         self.assertIn('prefix = "i-"', policy)
